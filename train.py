@@ -14,8 +14,6 @@ from models.dkt import DKT
 from utils import collate_fn
 from trainer import Trainer
 
-import constants
-
 def define_argparser():
     p = argparse.ArgumentParser()
 
