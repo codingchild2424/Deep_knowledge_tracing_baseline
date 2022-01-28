@@ -1,8 +1,3 @@
-import os
-import argparse
-import json
-import pickle
-
 import torch
 
 from torch.utils.data import DataLoader, random_split
@@ -12,8 +7,11 @@ from torch.nn.functional import binary_cross_entropy
 from dataloaders.assist2015_loader import ASSIST2015
 
 from models.dkt import DKT
+from models.dkt_plus import DKT_plus
+
 from utils import collate_fn
-from trainer import Trainer
+from trainer.dkt_trainer import DKT_trainer
+from trainer.dkt_plus_trainer import DKT_plus_trainer
 from define_argparser import define_argparser
 
 
@@ -35,6 +33,12 @@ def main(config):
             emb_size = config.dkt_emb_size,
             hidden_size = config.dkt_hidden_size
         ).to(device)
+    elif config.model_name == "dkt_plus":
+        model = DKT_plus(
+            num_q = dataset.num_q,
+            emb_size = config.dkt_plus_emb_size,
+            hidden_size = config.dkt_plus_hidden_size,
+        ).to(device)
     #-> 추가적인 모델 정의
     else:
         print("Wrong model_name was used...")
@@ -42,6 +46,8 @@ def main(config):
     #3. optimizer 선택
     if config.optimizer == "adam":
         optimizer = Adam(model.parameters(), config.learning_rate)
+    elif config.optimizer == "SGD":
+        optimizer = SGD(model.parameters(), config.learning_rate)
     #-> 추가적인 optimizer 설정
     else:
         print("Wrong optimizer was used...")
@@ -72,14 +78,27 @@ def main(config):
     )
 
     #trainer 실행
-    trainer = Trainer(
-        model = model,
-        optimizer = optimizer,
-        n_epochs = config.n_epochs,
-        device = device,
-        num_q = dataset.num_q,
-        crit = crit
-    )
+    if config.model_name == "dkt":
+        trainer = DKT_trainer(
+            model = model,
+            optimizer = optimizer,
+            n_epochs = config.n_epochs,
+            device = device,
+            num_q = dataset.num_q,
+            crit = crit
+        )
+    elif config.model_name == "dkt_plus":
+        trainer = DKT_plus_trainer(
+            model = model,
+            optimizer = optimizer,
+            n_epochs = config.n_epochs,
+            device = device,
+            num_q = dataset.num_q,
+            crit = crit,
+            lambda_r = config.dkt_plus_lambda_r,
+            lambda_w1 = config.dkt_plus_lambda_w1,
+            lambda_w2 = config.dkt_plus_lambda_w2
+        )
     #trainer의 train실행
     trainer.train(train_loader, test_loader)
 

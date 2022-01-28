@@ -47,8 +47,8 @@ class ASSIST2015(Dataset):
         u2idx = {u: idx for idx, u in enumerate(u_list)} #중복되지 않은 user에게 idx를 붙여준 딕셔너리
         q2idx = {q: idx for idx, q in enumerate(q_list)} #중복되지 않은 question에 idx를 붙여준 딕셔너리
 
-        q_seqs = []
-        r_seqs = []
+        q_seqs = [] #로그 기준으로 각 user별 질문 목록을 담은 리스트
+        r_seqs = [] #로그 기준으로 각 user별 정답 목록을 담은 리스트
 
         for u in u_list:
             df_u = df[df["user_id"] == u].sort_values("log_id")

@@ -6,7 +6,7 @@ from sklearn import metrics
 
 from tqdm import tqdm
 
-class Trainer():
+class DKT_trainer():
 
     def __init__(self, model, optimizer, n_epochs, device, num_q, crit):
         self.model = model

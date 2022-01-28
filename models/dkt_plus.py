@@ -1,7 +1,7 @@
 
 from torch.nn import Module, Embedding, LSTM, Sequential, Linear, Sigmoid
 
-class DKT(Module):
+class DKT_plus(Module):
     #num_q: 유일한 질문의 갯수
     #emb_size: 100
     #hidden_size: 100
