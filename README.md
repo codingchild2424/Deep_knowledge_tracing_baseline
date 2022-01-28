@@ -7,23 +7,6 @@ If you want to contact with us, please send me a mail.
 
 mail address: colaandedm@gmail.com
 
-# Manual
-## Python files
-
-Python files are program to initialize the DKT training and predicting.
-
-This program consist of 6 modules.
-
-1. dkt.py: DKT model
-
-2. trainer.py: class for training and validating
-
-3. train.py: main file
-
-4. utils.py: util class or functions
-
-5. model.pth: trained model files
-
 # Environments
 We use Docker environments for develop my code.
 
