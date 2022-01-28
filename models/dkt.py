@@ -28,7 +28,7 @@ class DKT(Module):
         self.n_layers = n_layers
         self.dropout_p = dropout_p
 
-        #|self.interaction_emb| = (200, 100)
+        #|self.interaction_emb| = (200, 100) -> 즉, 전체 문항의 맞고 틀림을 고려해서 문항수*2만큼의 행이 만들어지고, 각 행들은 embedding값으로 채워짐
         self.interaction_emb = Embedding( 
             self.num_q * 2, self.emb_size
         ) 
@@ -46,13 +46,15 @@ class DKT(Module):
             Sigmoid()
         )
 
-    def forward(self, q, r):
-        x = q + self.num_q * r
+    def forward(self, q_seqs, r_seqs):
+        #|q_seqs| = (bs, sq), |r_seqs| = (bs, sq)
+        x = q_seqs + self.num_q * r_seqs #|x| = (bs, sq)
 
-        z, _ = self.lstm_layer( self.interaction_emb(x) )
-        #|z| = (batch, )
+        interaction_emb = self.interaction_emb(x) #|interaction_emb| = (bs, sq, self.emb_size) -> 각각의 x에 해당하는 embedding값이 정해짐
 
-        y = self.out_layer(z)
+        z, _ = self.lstm_layer( interaction_emb ) #|z| = (bs, sq, self.hidden_size)
+
+        y = self.out_layer(z) #|y| = (bs, sq, self.num_q) -> 통과시키면 확률값이 나옴
 
         return y
 

@@ -54,9 +54,11 @@ def collate_fn(batch, pad_val=-1):
     )
 
     #각 원소가 -1이 아니면 Ture, -1이면 False로 값을 채움
-    #
+    #이후 (q_seqs != pad_val)과 (qshft_seqs != pad_val)을 곱해줌 => 그러면 qshft가 -1이 하나 더 많을 것이므로, qshft 기준으로 True 갯수가 맞춰짐
+    #mask_seqs는 실제로 문항이 있는 경우만을 추출하기 위해 사용됨(실제 문항이 있다면, True, 아니면 False, pad_val은 전체 길이를 맞춰주기 위해 사용됨)
     mask_seqs = (q_seqs != pad_val) * (qshft_seqs != pad_val)
 
+    #즉 전체를 qshft_seqs의 -1이 아닌 갯수만큼은 true(1)을 곱해서 원래 값을 부여하고, 아닌 것은 False(0)을 곱해서 0으로 만듦
     q_seqs, r_seqs, qshft_seqs, rshft_seqs = \
         q_seqs * mask_seqs, r_seqs * mask_seqs, qshft_seqs * mask_seqs, \
         rshft_seqs * mask_seqs
