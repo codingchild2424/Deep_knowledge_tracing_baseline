@@ -3,9 +3,8 @@ import torch
 import random
 import matplotlib.pyplot as plt
 import numpy as np
-from torch.nn.functional import one_hot
 
-def personal_pred_visualizer(model, model_path, test_loader, device, img_name, num_q):
+def personal_pred_visualizer(model, model_path, test_loader, device, img_name):
 
     img_path = './imgs/' + img_name + '_persoanl_pred'
 

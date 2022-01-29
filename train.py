@@ -117,12 +117,13 @@ def main(config):
         'config': config
     }, model_path)
 
-    #시각화 결과물 만들기
+    #시각화 결과물 만들기, 만약 계속만들어도 변경사항이 없다면, 하나로 통일하기
     if config.model_name == "dkt":
         roc_curve_visualizer(y_ture_record, y_score_record, config.model_name)
-        personal_pred_visualizer(model, model_path, test_loader, device, config.model_name , dataset.num_q)
+        personal_pred_visualizer(model, model_path, test_loader, device, config.model_name)
     elif config.model_name == "dkt_plus":
         roc_curve_visualizer(y_ture_record, y_score_record, config.model_name)
+        personal_pred_visualizer(model, model_path, test_loader, device, config.model_name)
 
 #main
 if __name__ == "__main__":

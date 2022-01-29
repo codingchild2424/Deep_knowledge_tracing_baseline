@@ -124,11 +124,12 @@ class DKT_plus_trainer():
             ))
 
             train_auc_score = self._train(train_loader)
-            test_auc_score = self._test(test_loader)
+            test_auc_score, y_trues, y_scores = self._test(test_loader)
 
             if test_auc_score >= highest_auc_score:
                 highest_auc_score = test_auc_score
                 best_model = deepcopy(self.model.state_dict())
+                y_true_record, y_score_record = y_trues, y_scores
 
             print("Epoch(%d/%d) result: train_auc_score=%.4f  test_auc_score=%.4f  highest_auc_score=%.4f" % (
                 epoch_index + 1,
