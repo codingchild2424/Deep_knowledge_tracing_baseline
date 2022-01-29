@@ -97,12 +97,14 @@ class DKT_trainer():
 
         auc_score += metrics.roc_auc_score( y_trues, y_scores )
 
-        return auc_score
+        return auc_score, y_trues, y_scores
 
     def train(self, train_loader, test_loader):
         
         highest_auc_score = 0
         best_model = None
+        #시각화를 위해 받아오기
+        y_true_record, y_score_record = [], []
 
         for epoch_index in range(self.n_epochs):
             
@@ -112,11 +114,12 @@ class DKT_trainer():
             ))
 
             train_auc_score = self._train(train_loader)
-            test_auc_score = self._test(test_loader)
+            test_auc_score, y_trues, y_scores = self._test(test_loader)
 
             if test_auc_score >= highest_auc_score:
                 highest_auc_score = test_auc_score
                 best_model = deepcopy(self.model.state_dict())
+                y_true_record, y_score_record = y_trues, y_scores
 
             print("Epoch(%d/%d) result: train_auc_score=%.4f  test_auc_score=%.4f  highest_auc_score=%.4f" % (
                 epoch_index + 1,
@@ -134,3 +137,5 @@ class DKT_trainer():
         
         # 가장 최고의 모델 복구    
         self.model.load_state_dict(best_model)
+
+        return y_true_record, y_score_record

@@ -10,10 +10,12 @@ from models.dkt import DKT
 from models.dkt_plus import DKT_plus
 
 from utils import collate_fn
-from trainer.dkt_trainer import DKT_trainer
-from trainer.dkt_plus_trainer import DKT_plus_trainer
+from trainers.dkt_trainer import DKT_trainer
+from trainers.dkt_plus_trainer import DKT_plus_trainer
 from define_argparser import define_argparser
 
+from visualizers.roc_auc_visualizer import roc_curve_visualizer
+from visualizers.personal_pred_visualizer import personal_pred_visualizer
 
 def main(config):
     #device 선언
@@ -72,6 +74,7 @@ def main(config):
         train_dataset, batch_size = config.batch_size, shuffle = True,
         collate_fn = collate_fn
     )
+
     test_loader = DataLoader(
         test_dataset, batch_size = config.batch_size, shuffle = True,
         collate_fn = collate_fn
@@ -87,6 +90,8 @@ def main(config):
             num_q = dataset.num_q,
             crit = crit
         )
+        y_ture_record, y_score_record = \
+            trainer.train(train_loader, test_loader)
     elif config.model_name == "dkt_plus":
         trainer = DKT_plus_trainer(
             model = model,
@@ -99,14 +104,25 @@ def main(config):
             lambda_w1 = config.dkt_plus_lambda_w1,
             lambda_w2 = config.dkt_plus_lambda_w2
         )
-    #trainer의 train실행
-    trainer.train(train_loader, test_loader)
+        y_ture_record, y_score_record = \
+            trainer.train(train_loader, test_loader)
+    #=> 새로운 trainer 넣기
+
+    #model 기록 저장 위치
+    model_path = './train_model_records/' + config.model_fn
 
     #model 기록
     torch.save({
         'model': trainer.model.state_dict(),
         'config': config
-    }, config.model_fn)
+    }, model_path)
+
+    #시각화 결과물 만들기
+    if config.model_name == "dkt":
+        roc_curve_visualizer(y_ture_record, y_score_record, config.model_name)
+        personal_pred_visualizer(model, model_path, test_loader, device, config.model_name , dataset.num_q)
+    elif config.model_name == "dkt_plus":
+        roc_curve_visualizer(y_ture_record, y_score_record, config.model_name)
 
 #main
 if __name__ == "__main__":
