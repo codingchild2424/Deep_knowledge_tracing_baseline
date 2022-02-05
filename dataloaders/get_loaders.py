@@ -15,21 +15,26 @@ def get_loaders(config):
     #num_q 받아오기
     num_q = dataset.num_q
 
+    #train, test 사이즈 나누기
     train_size = int( len(dataset) * config.train_ratio)
     test_size = len(dataset) - train_size
 
+    #train, test 각각 랜덤하게 섞어서 나누기
     train_dataset, test_dataset = random_split(
         dataset, [ train_size, test_size ]
     )
 
     #train, test 데이터 섞기
     train_loader = DataLoader(
-        train_dataset, batch_size = config.batch_size, shuffle = True,
+        train_dataset,
+        batch_size = config.batch_size,
+        shuffle = True,
         collate_fn = collate_fn
     )
-
     test_loader = DataLoader(
-        test_dataset, batch_size = config.batch_size, shuffle = True,
+        test_dataset,
+        batch_size = config.batch_size,
+        shuffle = True,
         collate_fn = collate_fn
     )
 

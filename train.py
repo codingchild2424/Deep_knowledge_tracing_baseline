@@ -4,9 +4,7 @@ from torch.optim import SGD, Adam
 from torch.nn.functional import binary_cross_entropy
 
 from dataloaders.get_loaders import get_loaders
-
-from models.dkt import DKT
-from models.dkt_plus import DKT_plus
+from models.get_models import get_models
 
 from trainers.dkt_trainer import DKT_trainer
 from trainers.dkt_plus_trainer import DKT_plus_trainer
@@ -16,28 +14,14 @@ from visualizers.roc_auc_visualizer import roc_curve_visualizer
 from visualizers.personal_pred_visualizer import personal_pred_visualizer
 
 def main(config):
-    #device 선언
+    #0. device 선언
     device = torch.device('cpu') if config.gpu_id < 0 else torch.device('cuda:%d' % config.gpu_id)
 
-    #데이터 받아오기
+    #1. 데이터 받아오기
     train_loader, test_loader, num_q = get_loaders(config)
 
     #2. model 선택
-    if config.model_name == "dkt":
-        model = DKT(
-            num_q = num_q,
-            emb_size = config.dkt_emb_size,
-            hidden_size = config.dkt_hidden_size
-        ).to(device)
-    elif config.model_name == "dkt_plus":
-        model = DKT_plus(
-            num_q = num_q,
-            emb_size = config.dkt_plus_emb_size,
-            hidden_size = config.dkt_plus_hidden_size,
-        ).to(device)
-    #-> 추가적인 모델 정의
-    else:
-        print("Wrong model_name was used...")
+    model = get_models(num_q, device, config)
 
     #3. optimizer 선택
     if config.optimizer == "adam":
