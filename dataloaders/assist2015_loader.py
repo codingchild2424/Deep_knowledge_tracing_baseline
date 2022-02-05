@@ -1,7 +1,3 @@
-import os
-
-import pickle
-
 import numpy as np
 import pandas as pd
 
@@ -9,7 +5,6 @@ from torch.utils.data import Dataset
 
 
 DATASET_DIR = "datasets/2015_100_skill_builders_main_problems.csv"
-
 
 class ASSIST2015(Dataset):
     def __init__(self, dataset_dir=DATASET_DIR) -> None:
