@@ -5,9 +5,8 @@ from torch.nn.functional import binary_cross_entropy
 
 from dataloaders.get_loaders import get_loaders
 from models.get_models import get_models
+from trainers.get_trainers import get_trainers
 
-from trainers.dkt_trainer import DKT_trainer
-from trainers.dkt_plus_trainer import DKT_plus_trainer
 from define_argparser import define_argparser
 
 from visualizers.roc_auc_visualizer import roc_curve_visualizer
@@ -39,33 +38,10 @@ def main(config):
     else:
         print("Wrong criterion was used...")
 
-    #trainer 실행
-    if config.model_name == "dkt":
-        trainer = DKT_trainer(
-            model = model,
-            optimizer = optimizer,
-            n_epochs = config.n_epochs,
-            device = device,
-            num_q = num_q,
-            crit = crit
-        )
-        y_ture_record, y_score_record = \
-            trainer.train(train_loader, test_loader)
-    elif config.model_name == "dkt_plus":
-        trainer = DKT_plus_trainer(
-            model = model,
-            optimizer = optimizer,
-            n_epochs = config.n_epochs,
-            device = device,
-            num_q = num_q,
-            crit = crit,
-            lambda_r = config.dkt_plus_lambda_r,
-            lambda_w1 = config.dkt_plus_lambda_w1,
-            lambda_w2 = config.dkt_plus_lambda_w2
-        )
-        y_ture_record, y_score_record = \
-            trainer.train(train_loader, test_loader)
-    #=> 새로운 trainer 넣기
+    #5. trainer 실행
+    trainer = get_trainers(model, optimizer, device, num_q, crit, config)
+    #계산
+    y_ture_record, y_score_record = trainer.train(train_loader, test_loader)
 
     #model 기록 저장 위치
     model_path = './train_model_records/' + config.model_fn

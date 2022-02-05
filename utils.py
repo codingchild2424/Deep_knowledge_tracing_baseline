@@ -1,33 +1,8 @@
-import numpy as np
 import torch
-
 from torch.nn.utils.rnn import pad_sequence
 
-# if torch.cuda.is_available():
-#     from torch.cuda import FloatTensor
-#     torch.set_default_tensor_type(torch.cuda.FloatTensor)
-# else:
-#     from torch import FloatTensor
-
 def collate_fn(batch, pad_val=-1):
-    '''
-        The collate function for torch.utils.data.DataLoader
 
-        Returns:
-            q_seqs: the question(KC) sequences with the size of \
-                [batch_size, maximum_sequence_length_in_the_batch]
-            r_seqs: the response sequences with the size of \
-                [batch_size, maximum_sequence_length_in_the_batch]
-            qshft_seqs: the question(KC) sequences which were shifted \
-                one step to the right with ths size of \
-                [batch_size, maximum_sequence_length_in_the_batch]
-            rshft_seqs: the response sequences which were shifted \
-                one step to the right with ths size of \
-                [batch_size, maximum_sequence_length_in_the_batch]
-            mask_seqs: the mask sequences indicating where \
-                the padded entry is with the size of \
-                [batch_size, maximum_sequence_length_in_the_batch]
-    '''
     q_seqs = []
     r_seqs = []
     qshft_seqs = []
@@ -64,3 +39,8 @@ def collate_fn(batch, pad_val=-1):
         rshft_seqs * mask_seqs
 
     return q_seqs, r_seqs, qshft_seqs, rshft_seqs, mask_seqs
+    #|q_seqs| = (batch_size, maximum_sequence_length_in_the_batch)
+    #|r_seqs| = (batch_size, maximum_sequence_length_in_the_batch)
+    #|qshft_seqs| = (batch_size, maximum_sequence_length_in_the_batch)
+    #|rshft_seqs| = (batch_size, maximum_sequence_length_in_the_batch)
+    #|mask_seqs| = (batch_size, maximum_sequence_length_in_the_batch)
