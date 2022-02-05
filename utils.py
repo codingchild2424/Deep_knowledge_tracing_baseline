@@ -1,6 +1,10 @@
 import torch
 from torch.nn.utils.rnn import pad_sequence
 
+from torch.optim import SGD, Adam
+
+from torch.nn.functional import binary_cross_entropy
+
 def collate_fn(batch, pad_val=-1):
 
     q_seqs = []
@@ -44,3 +48,25 @@ def collate_fn(batch, pad_val=-1):
     #|qshft_seqs| = (batch_size, maximum_sequence_length_in_the_batch)
     #|rshft_seqs| = (batch_size, maximum_sequence_length_in_the_batch)
     #|mask_seqs| = (batch_size, maximum_sequence_length_in_the_batch)
+
+#get_optimizer 정의
+def get_optimizers(model, config):
+    if config.optimizer == "adam":
+        optimizer = Adam(model.parameters(), config.learning_rate)
+    elif config.optimizer == "SGD":
+        optimizer = SGD(model.parameters(), config.learning_rate)
+    #-> 추가적인 optimizer 설정
+    else:
+        print("Wrong optimizer was used...")
+
+    return optimizer
+
+#get_crit 정의
+def get_crits(config):
+    if config.crit == "binary_cross_entropy":
+        crit = binary_cross_entropy
+    #-> 추가적인 criterion 설정
+    else:
+        print("Wrong criterion was used...")
+
+    return crit
