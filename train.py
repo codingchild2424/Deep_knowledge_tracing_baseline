@@ -2,10 +2,9 @@ import torch
 
 from dataloaders.get_loaders import get_loaders
 from models.get_models import get_models
-from research.Deep_knowledge_tracing_baseline.visualizers.get_visualizers import get_visualizers
 from trainers.get_trainers import get_trainers
+from visualizers.get_visualizers import get_visualizers
 from utils import get_optimizers, get_crits
-from visualizers import get_visualizers
 
 from define_argparser import define_argparser
 
