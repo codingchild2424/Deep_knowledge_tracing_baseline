@@ -175,8 +175,7 @@ def recorder(test_auc_score, record_time, config):
     append_list.extend([
         config.model_fn, config.batch_size, config.n_epochs,
         config.learning_rate, config.model_name, config.optimizer,
-        config.dataset_name, config.max_seq_len, config.num_encoder,
-        config.hidden_size, config.num_head, config.dropout_p,
+        config.dataset_name, config.max_seq_len, config.dropout_p,
         config.grad_acc, config.grad_acc_iter, config.fivefold
     ])
     append_list.append("test_auc_score")
