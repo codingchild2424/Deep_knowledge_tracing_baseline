@@ -9,11 +9,11 @@ DATASET_DIR = "../datasets/slepemapy/preprocessed_slepemapy.csv"
 PICKLE_DIR = "../datasets/slepemapy/"
 
 class SLEPEMAPY(Dataset):
-    def __init__(self, max_seq_len, dataset_dir=DATASET_DIR) -> None:
+    def __init__(self, max_seq_len, dataset_dir=DATASET_DIR, pickle_dir=PICKLE_DIR) -> None:
         super().__init__()
 
         self.dataset_dir = dataset_dir
-        self.pickle_dir = PICKLE_DIR
+        self.pickle_dir = pickle_dir
         
         if os.path.exists(os.path.join(self.pickle_dir, "q_seqs.pkl")):
             with open(os.path.join(self.pickle_dir, "q_seqs.pkl"), "rb") as f:

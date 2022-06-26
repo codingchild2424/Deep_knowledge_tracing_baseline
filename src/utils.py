@@ -163,7 +163,7 @@ class EarlyStopping:
 
 #recoder
 #깔끔하게 한장의 csv로 나오도록 바꿔보기
-def recorder(test_auc_score, record_time, config):
+def recorder(test_score, record_time, config):
 
     dir_path = "../score_records/"
     record_path = dir_path + "auc_record.csv"
@@ -178,8 +178,8 @@ def recorder(test_auc_score, record_time, config):
         config.dataset_name, config.max_seq_len, config.dropout_p,
         config.grad_acc, config.grad_acc_iter, config.fivefold
     ])
-    append_list.append("test_auc_score")
-    append_list.append(test_auc_score)
+    append_list.append(config.crit + "_test_score")
+    append_list.append(test_score)
 
     #csv파일 열어서 한줄 추가해주기
     with open(record_path, 'a', newline='') as f:
