@@ -2,34 +2,86 @@ from matplotlib.pyplot import new_figure_manager
 import numpy as np
 import torch.nn as nn
 import torch
+import math
 
 class MonotonicAttention(nn.Module):
-    def __init__(self):
+    def __init__(
+        self,
+        dropout_p,
+        ):
         super().__init__()
 
         self.softmax = nn.Softmax(dim=-1)
+        self.dropout = nn.Dropout(dropout_p)
 
-    def forward(self):
+    def forward(self, Q, K, V, mask=None, dk=64, gamma=None):
+        # |Q| = (batch_size, m, hidden_size)
+        # |K| = |V| = (batch_size, n, hidden_size)
+        # |mask| = (batch_size, m, n)
 
-        minus_theta = -1e8
-        distance = self.distance_func()
+        # w = attention energy
+        w = torch.bmm(Q, K.transpose(1, 2)) / math.sqrt(dk)
+        # |w| = (batch_size, m, n)
 
-        np.exp(minus_theta * distance)
-
+        if mask is not None:
+            assert w.size() == mask.size()
+            # mask를 -float('inf')로 만들어두니 overflow 문제 발생
+            w.masked_fill_(mask, -1e8)
         
-        s = 0
+        distance_score = self.distance_func(w)
+        minus_theta = -1e8
+
+        s = np.exp(minus_theta * distance_score) * w
 
         a = self.softmax(s)
 
         return a
 
-    #grad를 갱신하지 않음
+    #grad를 갱신하지 않음, 원 코드 304라인부터 확인
     @torch.no_grad()
-    def distance_func(self, t, tau):
+    def distance_func(self, w):
+
+        score = self.softmax(w) # gamma_t_t'
+
+        tau = torch.cumsum(score, dim=-1)
+        gamma = torch.sum(score, dim=-1, deepdim=True)
+
+        position_effect = torch.abs(tau - gamma)
+
+        return 0
+
+
 
         
 
-        np.absolute(t - tau)
+# class Attention(nn.Module):
+
+#     def __init__(self):
+#         super().__init__()
+
+#         self.softmax = nn.Softmax(dim=-1)
+
+#     def forward(self, Q, K, V, mask=None, dk=64):
+#         # |Q| = (batch_size, m, hidden_size)
+#         # |K| = |V| = (batch_size, n, hidden_size)
+#         # |mask| = (batch_size, m, n)
+
+#         # w = attention energy
+#         w = torch.bmm(Q, K.transpose(1, 2))
+
+#         # |w| = (batch_size, m, n)
+#         if mask is not None:
+#             assert w.size() == mask.size()
+#             # mask를 -float('inf')로 만들어두니 overflow 문제 발생
+#             w.masked_fill_(mask, -1e8)
+
+#         w = self.softmax(w / (dk**.5)) #attention값
+#         c = torch.bmm(w, V) #attention값과 Value값 행렬곱
+#         # |c| = (batch_size, m, hidden_size)
+
+#         return c
+
+
 
 class MultiheadAttention(nn.Module):
     def __init__(self):
@@ -38,11 +90,40 @@ class MultiheadAttention(nn.Module):
     def forward(self):
         pass
 
-# 원 코드 69~93까지
+class Transformer(nn.Module):
+    def __init__(self):
+        super().__init__()
+        pass
+    def forward(self):
+        pass
+
+class QKEncoder(nn.Module):
+    def __init__(
+        self,
+        num_q,
+        n_heads,
+        dropout,
+        d_model,
+        d_feature,
+        d_ff,
+        kq_same,
+        model_type
+        ):
+        super().__init__()
+        pass
+    def forward(self):
+        pass
+
+class Retriever(nn.Module):
+    def __init__(self):
+        super().__init__()
+        pass
+    def forward(self):
+        pass
+
 class RaschModelEmbedding(nn.Module):
     def __init__(
         self,
-        num_q, #num_q: concept의 unique한 수
         emb_size,
         l2=1e-5,
         ):
@@ -55,7 +136,7 @@ class RaschModelEmbedding(nn.Module):
         # d_ct
         self.q_emb_diff = nn.Embedding(self.num_q, self.emb_size)
         # e_(ct, rt)
-        self.qr_emb = nn.EmbeddingBag(self.num_q * 2, self.emb_size)
+        self.qr_emb = nn.Embedding(self.num_q * 2, self.emb_size)
         # f_(ct, rt)
         self.qr_emb_diff = nn.Embedding(self.num_q * 2, self.emb_size)
         # u, difficult parameter
@@ -83,7 +164,6 @@ class RaschModelEmbedding(nn.Module):
 
         return x_t, y_t, c_reg_loss
 
-
 # AKT Main 모델
 class AKT(nn.Module):
 
@@ -94,8 +174,6 @@ class AKT(nn.Module):
         self.emb_size = emb_size
 
         self.rasch_emb = RaschModelEmbedding(self.num_q, self.emb_size)
-
-        pass
 
     def forward(self, q, r, pid):
         

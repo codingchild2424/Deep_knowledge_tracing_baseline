@@ -56,6 +56,42 @@ def collate_fn(batch, pad_val=-1):
     #|rshft_seqs| = (batch_size, maximum_sequence_length_in_the_batch)
     #|mask_seqs| = (batch_size, maximum_sequence_length_in_the_batch)
 
+def pid_collate_fn(batch, pad_val=-1):
+
+    q_seqs = []
+    r_seqs = []
+    pid_seqs = []
+
+    for q_seq, r_seq, pid_seq in batch:
+
+        q_seqs.append(torch.Tensor(q_seq)) #총 데이터(M개) 중에서 앞의 첫번째 ~ (M-1), 갯수 M-1개
+        r_seqs.append(torch.Tensor(r_seq)) #총 데이터(M개) 중에서 앞의 첫번째 ~ (M-1), 갯수 M-1개
+        pid_seqs.append(torch.Tensor(pid_seq)) #총 데이터(M개) 중에서 앞의 첫번째 ~ (M-1), 갯수 M-1개
+
+    #가장 길이가 긴 seqs를 기준으로 길이를 맞추고, 길이를 맞추기 위해 그 자리에는 -1(pad_val)을 넣어줌
+    q_seqs = pad_sequence(
+        q_seqs, batch_first=True, padding_value=pad_val
+    )
+    r_seqs = pad_sequence(
+        r_seqs, batch_first=True, padding_value=pad_val
+    )
+    pid_seqs = pad_sequence(
+        pid_seqs, batch_first=True, padding_value=pad_val
+    )
+
+    #각 원소가 -1이 아니면 Ture, -1이면 False로 값을 채움
+    #mask_seqs는 실제로 문항이 있는 경우만을 추출하기 위해 사용됨(실제 문항이 있다면, True, 아니면 False, pad_val은 전체 길이를 맞춰주기 위해 사용됨)
+    mask_seqs = (q_seqs != pad_val)
+
+    #즉 전체를 qshft_seqs의 -1이 아닌 갯수만큼은 true(1)을 곱해서 원래 값을 부여하고, 아닌 것은 False(0)을 곱해서 0으로 만듦
+    q_seqs, r_seqs, pid_seqs = q_seqs * mask_seqs, r_seqs * mask_seqs, pid_seqs * mask_seqs
+
+    return q_seqs, r_seqs, pid_seqs, mask_seqs
+    #|q_seqs| = (batch_size, maximum_sequence_length_in_the_batch)
+    #|r_seqs| = (batch_size, maximum_sequence_length_in_the_batch)
+    #|mask_seqs| = (batch_size, maximum_sequence_length_in_the_batch)
+
+
 #get_optimizer 정의
 def get_optimizers(model, config):
     if config.optimizer == "adam":

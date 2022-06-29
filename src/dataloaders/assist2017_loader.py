@@ -38,7 +38,7 @@ class ASSIST2017(Dataset):
         df = df[(df["correct"] == 0) | (df["correct"] == 1)]
 
         u_list = np.unique(df["studentId"].values) #중복되지 않은 user의 목록
-        q_list = np.unique(df["problemId"].values) #중복되지 않은 question의 목록
+        q_list = np.unique(df["skill"].values) #중복되지 않은 question의 목록
         r_list = np.unique(df["correct"].values)
 
         u2idx = {u: idx for idx, u in enumerate(u_list)} #중복되지 않은 user에게 idx를 붙여준 딕셔너리
@@ -50,7 +50,7 @@ class ASSIST2017(Dataset):
         for u in u_list:
             df_u = df[df["studentId"] == u]
 
-            q_seq = np.array([q2idx[q] for q in df_u["problemId"].values]) # 판다스로 짜는게 좋음
+            q_seq = np.array([q2idx[q] for q in df_u["skill"].values]) # 판다스로 짜는게 좋음
             r_seq = df_u["correct"].values
 
             q_seqs.append(q_seq)
