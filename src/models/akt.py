@@ -124,12 +124,16 @@ class Retriever(nn.Module):
 class RaschModelEmbedding(nn.Module):
     def __init__(
         self,
+        num_q,
         emb_size,
         l2=1e-5,
         ):
         super().__init__()
 
+
+        self.num_q = num_q
         self.emb_size = emb_size
+        
         self.l2 = l2
         # c_ct
         self.q_emb = nn.Embedding(self.num_q, self.emb_size)
@@ -142,12 +146,14 @@ class RaschModelEmbedding(nn.Module):
         # u, difficult parameter
         self.diff_emb = nn.Embedding(self.num_pid, 1)
 
-    def forward(self, q, qr, pid):
+    def forward(self, q, r, pid):
         """
         q_data: concept
         qr: concept + response
         pid: problem id
         """
+        qr = q + self.num_q * r
+
         q_emb = self.q_emb(q)#c_c_t
         q_emb_diff = self.q_emb_diff(q) #d_c_t
 
