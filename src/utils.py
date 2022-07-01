@@ -209,10 +209,7 @@ def recorder(test_score, record_time, config):
 
     append_list.append(record_time)
     append_list.extend([
-        config.model_fn, config.batch_size, config.n_epochs,
-        config.learning_rate, config.model_name, config.optimizer,
-        config.dataset_name, config.max_seq_len, config.dropout_p,
-        config.grad_acc, config.grad_acc_iter, config.fivefold
+        config.model_fn, config.model_name, config.dataset_name
     ])
     append_list.append(config.crit + "_test_score")
     append_list.append(test_score)
