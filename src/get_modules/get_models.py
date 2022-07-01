@@ -2,6 +2,7 @@ from models.dkt import DKT
 from models.dkt_plus import DKT_plus
 from models.dkvmn import DKVMN
 from models.sakt import SAKT
+from models.akt import AKT
 
 def get_models(num_q, num_r, num_pid, device, config):
 
@@ -31,7 +32,16 @@ def get_models(num_q, num_r, num_pid, device, config):
             num_attn_heads = config.sakt_num_attn_heads, #default = 5
             device = device #어쩔 수 없이 추가 ㅜㅜ
         ).to(device)
-    #-> 추가적인 모델 정의
+    elif config.model_name == "akt":
+        model = AKT(
+            n_question=num_q,
+            n_pid=num_pid,
+            d_model=config.akt_d_model,
+            n_blocks=config.akt_n_block,
+            kq_same=config.akt_kq_same,
+            dropout=config.akt_dropout_p,
+            model_type="akt"
+        ).to(device)
     else:
         print("Wrong model_name was used...")
 

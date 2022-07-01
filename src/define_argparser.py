@@ -49,7 +49,16 @@ def define_argparser():
     p.add_argument('--sakt_num_attn_heads', type=int, default=5)
 
     #akt
+    # AKT Specific Parameter
+    p.add_argument('--akt_d_model', type=int, default=256)
+    p.add_argument('--akt_d_ff', type=int, default=1024)
+    p.add_argument('--akt_dropout_p', type=float, default=0.01)
+    p.add_argument('--akt_n_block', type=int, default=1)
+    p.add_argument('--akt_n_head', type=int, default=8)
+    p.add_argument('--akt_kq_same', type=int, default=1)
 
+    # AKT-R Specific Parameter
+    p.add_argument('--akt_l2', type=float, default=1e-5)
 
     
     config = p.parse_args()

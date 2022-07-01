@@ -2,6 +2,7 @@ from trainers.dkt_trainer import DKT_trainer
 from trainers.dkt_plus_trainer import DKT_plus_trainer
 from trainers.dkvmn_trainer import DKVMN_trainer
 from trainers.sakt_trainer import SAKT_trainer
+from trainers.akt_trainer import AKT_trainer
 
 def get_trainers(model, optimizer, device, num_q, crit, config):
 
@@ -41,6 +42,16 @@ def get_trainers(model, optimizer, device, num_q, crit, config):
         )
     elif config.model_name == "sakt":
         trainer = SAKT_trainer(
+            model = model,
+            optimizer = optimizer,
+            n_epochs = config.n_epochs,
+            device = device,
+            num_q = num_q,
+            crit = crit,
+            max_seq_len=config.max_seq_len           
+        )
+    elif config.model_name == "akt":
+        trainer = AKT_trainer(
             model = model,
             optimizer = optimizer,
             n_epochs = config.n_epochs,
