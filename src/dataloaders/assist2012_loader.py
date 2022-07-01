@@ -3,9 +3,9 @@ import pandas as pd
 
 from torch.utils.data import Dataset
 
-DATASET_DIR = "../datasets/algebra05/preprocessed_df.csv"
+DATASET_DIR = "../datasets/assistments12/preprocessed_df.csv"
 
-class ALGEBRA2005(Dataset):
+class ASSIST2012(Dataset):
     def __init__(self, max_seq_len, dataset_dir=DATASET_DIR) -> None:
         super().__init__()
 
@@ -33,10 +33,11 @@ class ALGEBRA2005(Dataset):
         return self.len
 
     def preprocess(self):
-        df = pd.read_csv(self.dataset_dir, sep='\t').sort_values(by=["timestamp"])
+        df = pd.read_csv(self.dataset_dir, encoding="ISO-8859-1", sep='\t')
+        df = df[(df["correct"] == 0) | (df["correct"] == 1)]
 
         u_list = np.unique(df["user_id"].values) #중복되지 않은 user의 목록
-        q_list = np.unique(df["skill_id"].values) #item은 'item_id'
+        q_list = np.unique(df["skill_id"].values) #중복되지 않은 question의 목록
         r_list = np.unique(df["correct"].values)
 
         u2idx = {u: idx for idx, u in enumerate(u_list)} #중복되지 않은 user에게 idx를 붙여준 딕셔너리

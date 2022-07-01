@@ -3,7 +3,7 @@ from models.dkt_plus import DKT_plus
 from models.dkvmn import DKVMN
 from models.sakt import SAKT
 
-def get_models(num_q, num_r, device, config):
+def get_models(num_q, num_r, num_pid, device, config):
 
     if config.model_name == "dkt":
         model = DKT(

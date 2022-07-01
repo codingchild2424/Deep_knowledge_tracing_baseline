@@ -3,7 +3,7 @@ import pandas as pd
 
 from torch.utils.data import Dataset
 
-DATASET_DIR = "../datasets/skill_builder_data.csv"
+DATASET_DIR = "../datasets/assistments09/preprocessed_df.csv"
 
 class ASSIST2009(Dataset):
     def __init__(self, max_seq_len, dataset_dir=DATASET_DIR) -> None:
@@ -33,12 +33,11 @@ class ASSIST2009(Dataset):
         return self.len
 
     def preprocess(self):
-        df = pd.read_csv(self.dataset_dir, encoding="ISO-8859-1")
-        #df = df[(df["correct"] == 0).values + (df["correct"] == 1).values]
+        df = pd.read_csv(self.dataset_dir, encoding="ISO-8859-1", sep='\t')
         df = df[(df["correct"] == 0) | (df["correct"] == 1)]
 
         u_list = np.unique(df["user_id"].values) #중복되지 않은 user의 목록
-        q_list = np.unique(df["skill_name"].values) #중복되지 않은 question의 목록
+        q_list = np.unique(df["skill_id"].values) #중복되지 않은 question의 목록
         r_list = np.unique(df["correct"].values)
 
         u2idx = {u: idx for idx, u in enumerate(u_list)} #중복되지 않은 user에게 idx를 붙여준 딕셔너리
@@ -50,7 +49,7 @@ class ASSIST2009(Dataset):
         for u in u_list:
             df_u = df[df["user_id"] == u]
 
-            q_seq = np.array([q2idx[q] for q in df_u["skill_name"].values]) # 판다스로 짜는게 좋음
+            q_seq = np.array([q2idx[q] for q in df_u["skill_id"].values]) # 판다스로 짜는게 좋음
             r_seq = df_u["correct"].values
 
             q_seqs.append(q_seq)
