@@ -103,12 +103,6 @@ def get_loaders(config, idx=None):
         num_r = dataset.num_r
         num_pid = dataset.num_pid
         collate = pid_collate_fn
-    elif config.dataset_name == "slepemapy_pid":
-        dataset = SLEPEMAPY_PID(config.max_seq_len)
-        num_q = dataset.num_q
-        num_r = dataset.num_r
-        num_pid = dataset.num_pid
-        collate = pid_collate_fn
     else:
         print("Wrong dataset_name was used...")
 

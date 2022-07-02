@@ -57,6 +57,9 @@ class AKT(nn.Module):
             ), nn.Dropout(self.dropout),
             nn.Linear(256, 1)
         )
+
+        self.sigmoid = nn.Sigmoid()
+
         self.reset()
 
     def reset(self):
@@ -64,7 +67,10 @@ class AKT(nn.Module):
             if p.size(0) == self.n_pid+1 and self.n_pid > 0:
                 torch.nn.init.constant_(p, 0.)
 
-    def forward(self, q_data, qa_data, target, pid_data=None):
+    def forward(self, q_data, target, pid_data=None):
+
+        qa_data = q_data + (target * self.n_question)
+
         # Batch First
         q_embed_data = self.q_embed(q_data)  # BS, seqlen,  d_model# c_ct
         if self.separate_qa:
@@ -98,16 +104,13 @@ class AKT(nn.Module):
         d_output = self.model(q_embed_data, qa_embed_data)  # 211x512
 
         concat_q = torch.cat([d_output, q_embed_data], dim=-1)
-        output = self.out(concat_q)
-        labels = target.reshape(-1)
-        m = nn.Sigmoid()
-        preds = (output.reshape(-1))  # logit
-        mask = labels > -0.9
-        masked_labels = labels[mask].float()
-        masked_preds = preds[mask]
-        loss = nn.BCEWithLogitsLoss(reduction='none')
-        output = loss(masked_preds, masked_labels)
-        return output.sum()+c_reg_loss, m(preds), mask.sum()
+        output = self.out(concat_q).squeeze()
+        # |output| = (bs, sq)
+
+        output = self.sigmoid(output)
+        # |output| = (bs, sq)
+
+        return output, c_reg_loss
 
 
 class Architecture(nn.Module):
