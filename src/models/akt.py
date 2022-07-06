@@ -51,10 +51,12 @@ class AKT(nn.Module):
                                     d_model=d_model, d_feature=d_model / n_heads, d_ff=d_ff,  kq_same=self.kq_same, model_type=self.model_type)
 
         self.out = nn.Sequential(
-            nn.Linear(d_model + embed_l,
-                      final_fc_dim), nn.ReLU(), nn.Dropout(self.dropout),
-            nn.Linear(final_fc_dim, 256), nn.ReLU(
-            ), nn.Dropout(self.dropout),
+            nn.Linear((d_model + embed_l), final_fc_dim), 
+            nn.ReLU(), 
+            nn.Dropout(self.dropout),
+            nn.Linear(final_fc_dim, 256), 
+            nn.ReLU(), 
+            nn.Dropout(self.dropout),
             nn.Linear(256, 1)
         )
 
@@ -214,7 +216,8 @@ class TransformerLayer(nn.Module):
             # Calls block.masked_attn_head.forward() method
             query2 = self.masked_attn_head(
                 query, key, values, mask=src_mask, zero_pad=False)
-
+        # |query2| = (64, 100, 256) = (bs, sq, d_model)
+        
         query = query + self.dropout1((query2))
         query = self.layer_norm1(query)
         if apply_pos:
@@ -283,12 +286,15 @@ class MultiHeadAttention(nn.Module):
         gammas = self.gammas
         scores = attention(q, k, v, self.d_k,
                            mask, self.dropout, zero_pad, gammas)
+        # |scores| = (64, 8, 100, 32)
 
         # concatenate heads and put through final linear layer
         concat = scores.transpose(1, 2).contiguous()\
             .view(bs, -1, self.d_model)
+        # |concat| = (64, 100, 256) = (bs, sq, d_model)
 
         output = self.out_proj(concat)
+        # |output| = (64, 100, 256) = (bs, sq, d_model)
 
         return output
 
@@ -354,6 +360,8 @@ def attention(q, k, v, d_k, mask, dropout, zero_pad, gamma=None):
         scores = torch.cat([pad_zero, scores[:, :, 1:, :]], dim=2)
     scores = dropout(scores)
     output = torch.matmul(scores, v)
+    # |output| = (64, 8, 100, 32)
+
     return output
 
 

@@ -168,9 +168,6 @@ class AKT_trainer():
         y_trues = torch.cat(y_trues).detach().cpu().numpy()
         y_scores = torch.cat(y_scores).detach().cpu().numpy()
 
-        print("y_trues", y_trues)
-        print("y_scores", y_scores)
-
         auc_score += metrics.roc_auc_score( y_trues, y_scores )
 
         loss_result = torch.mean(torch.Tensor(loss_list)).detach().cpu().numpy()
@@ -180,19 +177,22 @@ class AKT_trainer():
         elif metric_name == "RMSE":
             return loss_result
 
-     #auc용으로 train
+    #auc용으로 train
     def train(self, train_loader, valid_loader, test_loader, config):
         
         if config.crit == "binary_cross_entropy":
             best_valid_score = 0
+            best_test_score = 0
             metric_name = "AUC"
         elif config.crit == "rmse":
             best_valid_score = float('inf')
+            best_test_score = float('inf')
             metric_name = "RMSE"
-        test_auc_score = 0
+        
         #출력을 위한 기록용
         train_scores = []
         valid_scores = []
+        test_scores = []
         #best_model = None
 
         # early_stopping 선언
@@ -210,50 +210,42 @@ class AKT_trainer():
             # Training Session
             train_score = self._train(train_loader, metric_name)
             valid_score = self._validate(valid_loader, metric_name)
+            test_score = self._test(test_loader, metric_name)
 
             # train, test record 저장
             train_scores.append(train_score)
             valid_scores.append(valid_score)
-
-            # statistics
-            train_scores_avg = np.average(train_scores)
-            valid_scores_avg = np.average(valid_scores)
+            test_scores.append(test_score)
 
             # early stop
+            train_scores_avg = np.average(train_scores)
+            valid_scores_avg = np.average(valid_scores)
             early_stopping(valid_scores_avg, self.model)
             if early_stopping.early_stop:
                 print("Early stopping")
                 break
 
             if config.crit == "binary_cross_entropy":
-                if valid_score >= best_valid_score:
-                    best_valid_score = valid_score
+                if test_score >= best_test_score:
+                    best_test_score = test_score
                     #best_model = deepcopy(self.model.state_dict())
             elif config.crit == "rmse":
-                if valid_score <= best_valid_score:
-                    best_valid_score = valid_score
+                if test_score <= best_test_score:
+                    best_test_score = test_score
                     #best_model = deepcopy(self.model.state_dict())
 
-            print("Epoch(%d/%d) result: train_score=%.4f  valid_score=%.4f  best_valid_score=%.4f" % (
+            print("Epoch(%d/%d) result: train_score=%.4f  valid_score=%.4f test_score=%.4f best_test_score=%.4f" % (
                 epoch_index + 1,
                 self.n_epochs,
                 train_score,
                 valid_score,
-                best_valid_score,
+                test_score,
+                best_test_score,
             ))
 
         print("\n")
-        print("The Best_" + metric_name + "_Score in Training Session is %.4f" % (
-                best_valid_score,
-            ))
-        print("\n")
-
-        # Test Session
-        test_auc_score = self._test(test_loader, metric_name)
-
-        print("\n")
-        print("The Best_" + metric_name + "_Score in Testing Session is %.4f" % (
-                test_auc_score,
+        print("The Best Test Score(" + metric_name + ") in Testing Session is %.4f" % (
+                best_test_score,
             ))
         print("\n")
         
@@ -262,4 +254,4 @@ class AKT_trainer():
         self.model.load_state_dict(torch.load("../checkpoints/checkpoint.pt"))
 
         return train_scores, valid_scores, \
-            best_valid_score, test_auc_score
+            best_valid_score, best_test_score
