@@ -17,3 +17,39 @@ do
         --n_epochs 1000
     done
 done
+
+python \
+train.py \
+--model_fn model.pth \
+--model_name dkt_c_q \
+--dataset_name dkt_assist2009_pid
+
+python \
+train.py \
+--model_fn model.pth \
+--model_name dkt_c_rasch \
+--dataset_name dkt_assist2009_pid
+
+python \
+train.py \
+--model_fn model.pth \
+--model_name dkt_c_q_ctt \
+--dataset_name dkt_assist2009_pid_diff
+
+python \
+train.py \
+--model_fn model.pth \
+--model_name dkvmn_c_q \
+--dataset_name assist2009_pid
+
+python \
+train.py \
+--model_fn model.pth \
+--model_name dkvmn_c_rasch \
+--dataset_name assist2009_pid
+
+python \
+train.py \
+--model_fn model.pth \
+--model_name dkvmn_c_q_ctt \
+--dataset_name dkt_assist2009_pid_diff \
