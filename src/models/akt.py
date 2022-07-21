@@ -344,13 +344,16 @@ def attention(q, k, v, d_k, mask, dropout, zero_pad, gamma=None):
             (disttotal_scores-distcum_scores) * position_effect, min=0.) #모두 0이상으로 만듦
 
         dist_scores = dist_scores.sqrt().detach()
-        # |dist_scores| = (24, 8, 200, 200)
+        # |dist_scores| = (bs, 8, 200, 200)
+        #print("dist_scores", dist_scores[0][0][2])
 
     m = nn.Softplus()
     gamma = -1. * m(gamma).unsqueeze(0)  # 1,8,1,1
     # Now after do exp(gamma*distance) and then clamp to 1e-5 to 1e5
     total_effect = torch.clamp(torch.clamp(
         (dist_scores*gamma).exp(), min=1e-5), max=1e5)
+    # scores는 attention값
+    # total_effect는 
     scores = scores * total_effect
 
     scores.masked_fill_(mask == 0, -1e32)

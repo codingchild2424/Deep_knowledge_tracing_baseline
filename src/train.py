@@ -44,7 +44,7 @@ def main(config, train_loader=None, valid_loader=None, test_loader=None, num_q=N
     record_time = str(today.month) + "_" + str(today.day) + "_" + str(today.hour) + "_" + str(today.minute)
 
     #7. model 기록 저장 위치
-    model_path = '../model_records/' + str(round(test_auc_score, 6)) + "_" + record_time + "_" + config.model_fn
+    model_path = '../model_records/' + str(test_auc_score) + "_" + record_time + "_" + config.model_fn
 
     #8. model 기록
     torch.save({

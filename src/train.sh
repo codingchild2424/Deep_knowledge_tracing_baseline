@@ -1,7 +1,6 @@
 #!/bin/bash
-
-datasets="assist2009 assist2012 assist2015 assist2017 algebra2005 algebra2006"
-model_names="dkt dkvmn sakt"
+model_names="sakt dkvmn"
+datasets="algebra2006"
 
 for dataset in ${datasets}
 do
@@ -9,13 +8,12 @@ do
     do
         python \
         train.py \
-        --model_fn model.pth \
+        --model_fn sakt_model.pth \
         --model_name ${model_name} \
         --dataset_name ${dataset} \
-        --batch_size 256 \
-        --grad_acc True \
-        --grad_acc_iter 2 \
+        --batch_size 512 \
         --fivefold True \
+        --crit rmse \
         --n_epochs 1000
     done
 done

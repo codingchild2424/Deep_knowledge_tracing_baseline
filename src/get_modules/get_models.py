@@ -3,12 +3,21 @@ from models.dkt_plus import DKT_plus
 from models.dkvmn import DKVMN
 from models.sakt import SAKT
 from models.akt import AKT
+from models.dkt_c_q import DKT_c_q
 
 def get_models(num_q, num_r, num_pid, device, config):
 
     if config.model_name == "dkt":
         model = DKT(
             num_q = num_q,
+            emb_size = config.dkt_emb_size,
+            hidden_size = config.dkt_hidden_size
+        ).to(device)
+    if config.model_name == "dkt_c_q":
+        model = DKT_c_q(
+            num_q = num_q,
+            num_r = num_r,
+            num_pid = num_pid,
             emb_size = config.dkt_emb_size,
             hidden_size = config.dkt_hidden_size
         ).to(device)
