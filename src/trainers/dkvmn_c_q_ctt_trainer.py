@@ -41,7 +41,7 @@ class DKVMN_c_q_ctt_trainer():
 
         for idx, data in enumerate(tqdm(train_loader)):
             self.model.train()
-            q_seqs, r_seqs, pid_seqs, diff_seqs, mask_seqs = data #collate에 정의된 데이터가 나옴
+            q_seqs, r_seqs, _, _, pid_seqs, diff_seqs, mask_seqs = data #collate에 정의된 데이터가 나옴
             q_seqs = q_seqs.to(self.device) #|q_seqs| = (bs, sq) -> [[58., 58., 58., -0., -0., -0., -0., ...], [58., 58., 58., -0., -0., -0., -0., ...]...]
             r_seqs = r_seqs.to(self.device) #|r_seqs| = (bs, sq) -> [[1., 1., 0., -0., -0., -0., -0., ...], [1., 1., 0., -0., -0., -0., -0., ...]...]
             pid_seqs = pid_seqs.to(self.device)
@@ -97,7 +97,7 @@ class DKVMN_c_q_ctt_trainer():
         with torch.no_grad():
             for data in tqdm(valid_loader):
                 self.model.eval()
-                q_seqs, r_seqs, pid_seqs, diff_seqs, mask_seqs = data #collate에 정의된 데이터가 나옴
+                q_seqs, r_seqs, _, _, pid_seqs, diff_seqs, mask_seqs = data #collate에 정의된 데이터가 나옴
                 q_seqs = q_seqs.to(self.device)
                 r_seqs = r_seqs.to(self.device)
                 pid_seqs = pid_seqs.to(self.device)
@@ -138,7 +138,7 @@ class DKVMN_c_q_ctt_trainer():
         with torch.no_grad():
             for data in tqdm(test_loader):
                 self.model.eval()
-                q_seqs, r_seqs, pid_seqs, diff_seqs, mask_seqs = data #collate에 정의된 데이터가 나옴
+                q_seqs, r_seqs, _, _, pid_seqs, diff_seqs, mask_seqs = data #collate에 정의된 데이터가 나옴
                 q_seqs = q_seqs.to(self.device)
                 r_seqs = r_seqs.to(self.device)
                 pid_seqs = pid_seqs.to(self.device)

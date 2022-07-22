@@ -9,7 +9,7 @@ from random import random, randint
 
 from utils import EarlyStopping
 
-class SAKT_c_q_diff_trainer():
+class SAKT_c_q_ctt_trainer():
 
     def __init__(
         self,

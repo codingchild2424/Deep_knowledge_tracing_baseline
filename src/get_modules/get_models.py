@@ -11,7 +11,7 @@ from models.dkvmn_c_rasch import DKVMN_c_rasch
 from models.dkvmn_c_q_ctt import DKVMN_c_q_ctt
 from models.sakt_c_q import SAKT_c_q
 from models.sakt_c_rasch import SAKT_c_rasch
-from models.sakt_c_q_diff import SAKT_c_q_diff
+from models.sakt_c_q_ctt import SAKT_c_q_ctt
 
 def get_models(num_q, num_r, num_pid, num_diff, device, config):
 
@@ -106,8 +106,8 @@ def get_models(num_q, num_r, num_pid, num_diff, device, config):
             num_attn_heads = config.sakt_num_attn_heads, #default = 5
             device = device #어쩔 수 없이 추가 ㅜㅜ
         ).to(device)
-    elif config.model_name == "sakt_c_q_diff":
-        model = SAKT_c_q_diff(
+    elif config.model_name == "sakt_c_q_ctt":
+        model = SAKT_c_q_ctt(
             num_q = num_q,
             num_pid = num_pid,
             num_diff = num_diff,
