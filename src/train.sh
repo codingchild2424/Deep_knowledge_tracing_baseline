@@ -1,16 +1,31 @@
 #!/bin/bash
 
-datasets="assist2009 assist2012 assist2015 assist2017 algebra2005 algebra2006"
-model_names="dkt dkvmn sakt"
+datasets="assist2009 assist2017 algebra2005 algebra2006"
+pid_datasets="assist2009_pid assist2017_pid algebra2005_pid algebra2006_pid"
+models="dkt dkvmn sakt"
 
-for dataset in ${datasets}
+for pid_dataset in ${pid_datasets}
 do
-    for model_name in ${model_names}
+    python \
+    train.py \
+    --model_fn model.pth \
+    --model_name akt \
+    --dataset_name ${pid_dataset} \
+    --batch_size 256 \
+    --grad_acc True \
+    --grad_acc_iter 2 \
+    --fivefold True \
+    --n_epochs 1000
+done
+
+for model in ${models}
+do
+    for dataset in ${datasets}
     do
         python \
         train.py \
         --model_fn model.pth \
-        --model_name ${model_name} \
+        --model_name ${model} \
         --dataset_name ${dataset} \
         --batch_size 256 \
         --grad_acc True \

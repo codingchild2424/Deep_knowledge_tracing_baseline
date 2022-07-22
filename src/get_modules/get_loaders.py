@@ -14,6 +14,8 @@ from dataloaders.assist2012_loader import ASSIST2012
 from dataloaders.assist2012_pid_loader import ASSIST2012_PID
 from dataloaders.algebra2005_pid_loader import ALGEBRA2005_PID
 from dataloaders.algebra2006_pid_loader import ALGEBRA2006_PID
+from dataloaders.slepemapy_loader import SLEPEMAPY
+from dataloaders.slepemapy_pid_loader import SLEPEMAPY_PID
 
 #get_loaders를 따로 만들고, 이 함수를 train에서 불러내기
 def get_loaders(config, idx=None):
@@ -99,6 +101,12 @@ def get_loaders(config, idx=None):
         collate = pid_collate_fn
     elif config.dataset_name == "algebra2006_pid":
         dataset = ALGEBRA2006_PID(config.max_seq_len)  
+        num_q = dataset.num_q
+        num_r = dataset.num_r
+        num_pid = dataset.num_pid
+        collate = pid_collate_fn
+    elif config.dataset_name == "slepemapy_pid":
+        dataset = SLEPEMAPY_PID(config.max_seq_len)
         num_q = dataset.num_q
         num_r = dataset.num_r
         num_pid = dataset.num_pid
