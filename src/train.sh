@@ -52,4 +52,22 @@ python \
 train.py \
 --model_fn model.pth \
 --model_name dkvmn_c_q_ctt \
---dataset_name dkt_assist2009_pid_diff \
+--dataset_name dkt_assist2009_pid_diff
+
+python \
+train.py \
+--model_fn model.pth \
+--model_name sakt_c_q \
+--dataset_name dkt_assist2009_pid
+
+python \
+train.py \
+--model_fn model.pth \
+--model_name sakt_c_rasch \
+--dataset_name dkt_assist2009_pid
+
+python \
+train.py \
+--model_fn model.pth \
+--model_name sakt_c_q_diff \
+--dataset_name dkt_assist2009_pid_diff
