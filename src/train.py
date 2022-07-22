@@ -9,7 +9,7 @@ from utils import get_optimizers, get_crits, recorder, visualizer
 
 from define_argparser import define_argparser
 
-def main(config, train_loader=None, valid_loader=None, test_loader=None, num_q=None, num_r=None, num_pid=None):
+def main(config, train_loader=None, valid_loader=None, test_loader=None, num_q=None, num_r=None, num_pid=None, num_diff=None):
     #0. device 선언
     device = torch.device('cpu') if config.gpu_id < 0 else torch.device('cuda:%d' % config.gpu_id)
     
@@ -21,11 +21,12 @@ def main(config, train_loader=None, valid_loader=None, test_loader=None, num_q=N
         num_q = num_q
         num_r = num_r
         num_pid = num_pid
+        num_diff = num_diff
     else:
-        train_loader, valid_loader, test_loader, num_q, num_r, num_pid = get_loaders(config)
+        train_loader, valid_loader, test_loader, num_q, num_r, num_pid, num_diff = get_loaders(config)
 
     #2. model 선택
-    model = get_models(num_q, num_r, num_pid, device, config)
+    model = get_models(num_q, num_r, num_pid, num_diff, device, config)
     
     #3. optimizer 선택
     optimizer = get_optimizers(model, config)
@@ -44,7 +45,7 @@ def main(config, train_loader=None, valid_loader=None, test_loader=None, num_q=N
     record_time = str(today.month) + "_" + str(today.day) + "_" + str(today.hour) + "_" + str(today.minute)
 
     #7. model 기록 저장 위치
-    model_path = '../model_records/' + str(round(test_auc_score, 6)) + "_" + record_time + "_" + config.model_fn
+    model_path = '../model_records/' + str(test_auc_score) + "_" + record_time + "_" + config.model_fn
 
     #8. model 기록
     torch.save({
@@ -67,10 +68,10 @@ if __name__ == "__main__":
         test_scores_list = []
         
         for idx in range(5):
-            train_loader, valid_loader, test_loader, num_q, num_r, num_pid = get_loaders(config, idx)
+            train_loader, valid_loader, test_loader, num_q, num_r, num_pid, num_diff = get_loaders(config, idx)
             train_auc_scores, valid_auc_scores, \
                  best_valid_score, test_auc_score,  \
-                    record_time = main(config, train_loader, valid_loader, test_loader, num_q, num_r, num_pid)
+                    record_time = main(config, train_loader, valid_loader, test_loader, num_q, num_r, num_pid, num_diff)
             # highest_auc_scores.append(highest_auc_score)
             # train_auc_scores_list.append(train_auc_scores)
             # valid_auc_scores_list.append(valid_auc_scores)

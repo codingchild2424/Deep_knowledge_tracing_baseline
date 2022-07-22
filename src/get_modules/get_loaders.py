@@ -1,5 +1,5 @@
 from torch.utils.data import DataLoader, random_split, Subset, ConcatDataset
-from utils import collate_fn, pid_collate_fn
+from utils import collate_fn, pid_collate_fn, dkt_pid_collate_fn, dkt_pid_diff_collate_fn, pid_diff_collate_fn
 from dataloaders.assist2015_loader import ASSIST2015
 from dataloaders.assist2009_loader import ASSIST2009
 from dataloaders.algebra2005_loader import ALGEBRA2005
@@ -14,8 +14,12 @@ from dataloaders.assist2012_loader import ASSIST2012
 from dataloaders.assist2012_pid_loader import ASSIST2012_PID
 from dataloaders.algebra2005_pid_loader import ALGEBRA2005_PID
 from dataloaders.algebra2006_pid_loader import ALGEBRA2006_PID
+<<<<<<< HEAD
 from dataloaders.slepemapy_loader import SLEPEMAPY
 from dataloaders.slepemapy_pid_loader import SLEPEMAPY_PID
+=======
+from dataloaders.assist2009_pid_diff_loader import ASSIST2009_PID_DIFF
+>>>>>>> 3a965899191a4ca2ccac25dc3cfd8ddec5de0d7b
 
 #get_loaders를 따로 만들고, 이 함수를 train에서 불러내기
 def get_loaders(config, idx=None):
@@ -26,91 +30,129 @@ def get_loaders(config, idx=None):
         num_q = dataset.num_q
         num_r = dataset.num_r
         num_pid = None
+        num_diff = None
         collate = collate_fn
     elif config.dataset_name == "assist2009":
         dataset = ASSIST2009(config.max_seq_len)
         num_q = dataset.num_q
         num_r = dataset.num_r
         num_pid = None
+        num_diff = None
         collate = collate_fn
     elif config.dataset_name == "assist2012":
         dataset = ASSIST2012(config.max_seq_len)
         num_q = dataset.num_q
         num_r = dataset.num_r
         num_pid = None
+        num_diff = None
         collate = collate_fn
     elif config.dataset_name == "algebra2005":
         dataset = ALGEBRA2005(config.max_seq_len)
         num_q = dataset.num_q
         num_r = dataset.num_r
         num_pid = None
+        num_diff = None
         collate = collate_fn
     elif config.dataset_name == "algebra2006":
         dataset = ALGEBRA2006(config.max_seq_len)
         num_q = dataset.num_q
         num_r = dataset.num_r
         num_pid = None
+        num_diff = None
         collate = collate_fn
     elif config.dataset_name == "slepemapy":
         dataset = SLEPEMAPY(config.max_seq_len)
         num_q = dataset.num_q
         num_r = dataset.num_r
         num_pid = None
+        num_diff = None
         collate = collate_fn
     elif config.dataset_name == "ednet":
         dataset = EDNET(config.max_seq_len)
         num_q = dataset.num_q
         num_r = dataset.num_r
         num_pid = None
+        num_diff = None
         collate = collate_fn
     elif config.dataset_name == "assist2017":
         dataset = ASSIST2017(config.max_seq_len)
         num_q = dataset.num_q
         num_r = dataset.num_r
         num_pid = None
+        num_diff = None
         collate = collate_fn
     elif config.dataset_name == "statics":
         dataset = STATICS(config.max_seq_len)  
         num_q = dataset.num_q
         num_r = dataset.num_r
         num_pid = None
+        num_diff = None
         collate = collate_fn
     elif config.dataset_name == "assist2009_pid":
         dataset = ASSIST2009_PID(config.max_seq_len)  
         num_q = dataset.num_q
         num_r = dataset.num_r
         num_pid = dataset.num_pid
+        num_diff = None
         collate = pid_collate_fn
+    elif config.dataset_name == "dkt_assist2009_pid":
+        dataset = ASSIST2009_PID(config.max_seq_len)  
+        num_q = dataset.num_q
+        num_r = dataset.num_r
+        num_pid = dataset.num_pid
+        num_diff = None
+        collate = dkt_pid_collate_fn
     elif config.dataset_name == "assist2017_pid":
         dataset = ASSIST2017_PID(config.max_seq_len)  
         num_q = dataset.num_q
         num_r = dataset.num_r
         num_pid = dataset.num_pid
+        num_diff = None
         collate = pid_collate_fn
     elif config.dataset_name == "assist2012_pid":
         dataset = ASSIST2012_PID(config.max_seq_len)  
         num_q = dataset.num_q
         num_r = dataset.num_r
         num_pid = dataset.num_pid
+        num_diff = None
         collate = pid_collate_fn
     elif config.dataset_name == "algebra2005_pid":
         dataset = ALGEBRA2005_PID(config.max_seq_len)  
         num_q = dataset.num_q
         num_r = dataset.num_r
         num_pid = dataset.num_pid
+        num_diff = None
         collate = pid_collate_fn
     elif config.dataset_name == "algebra2006_pid":
         dataset = ALGEBRA2006_PID(config.max_seq_len)  
         num_q = dataset.num_q
         num_r = dataset.num_r
         num_pid = dataset.num_pid
+        num_diff = None
         collate = pid_collate_fn
+<<<<<<< HEAD
     elif config.dataset_name == "slepemapy_pid":
         dataset = SLEPEMAPY_PID(config.max_seq_len)
         num_q = dataset.num_q
         num_r = dataset.num_r
         num_pid = dataset.num_pid
         collate = pid_collate_fn
+=======
+    elif config.dataset_name == "dkt_assist2009_pid_diff":
+        dataset = ASSIST2009_PID_DIFF(config.max_seq_len)  
+        num_q = dataset.num_q
+        num_r = dataset.num_r
+        num_pid = dataset.num_pid
+        num_diff = dataset.num_diff
+        collate = dkt_pid_diff_collate_fn
+    elif config.dataset_name == "assist2009_pid_diff":
+        dataset = ASSIST2009_PID_DIFF(config.max_seq_len)  
+        num_q = dataset.num_q
+        num_r = dataset.num_r
+        num_pid = dataset.num_pid
+        num_diff = dataset.num_diff
+        collate = pid_diff_collate_fn
+>>>>>>> 3a965899191a4ca2ccac25dc3cfd8ddec5de0d7b
     else:
         print("Wrong dataset_name was used...")
 
@@ -202,4 +244,4 @@ def get_loaders(config, idx=None):
         collate_fn = collate
     )
 
-    return train_loader, valid_loader, test_loader, num_q, num_r, num_pid
+    return train_loader, valid_loader, test_loader, num_q, num_r, num_pid, num_diff
