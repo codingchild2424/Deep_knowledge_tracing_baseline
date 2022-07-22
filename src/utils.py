@@ -169,10 +169,10 @@ def pid_diff_collate_fn(batch, pad_val=-1):
     diff_seqs = []
 
     for q_seq, r_seq, pid_seq, diff_seq in batch:
-        q_seqs.append(torch.Tensor(q_seq[:-1])) #총 데이터(M개) 중에서 앞의 첫번째 ~ (M-1), 갯수 M-1개
-        r_seqs.append(torch.Tensor(r_seq[:-1])) #총 데이터(M개) 중에서 앞의 첫번째 ~ (M-1), 갯수 M-1개
-        pid_seqs.append(torch.Tensor(pid_seq[:-1]))
-        diff_seqs.append(torch.Tensor(diff_seq[:-1]))
+        q_seqs.append(torch.Tensor(q_seq)) #총 데이터(M개) 중에서 앞의 첫번째 ~ (M-1), 갯수 M-1개
+        r_seqs.append(torch.Tensor(r_seq)) #총 데이터(M개) 중에서 앞의 첫번째 ~ (M-1), 갯수 M-1개
+        pid_seqs.append(torch.Tensor(pid_seq))
+        diff_seqs.append(torch.Tensor(diff_seq))
 
     #가장 길이가 긴 seqs를 기준으로 길이를 맞추고, 길이를 맞추기 위해 그 자리에는 -1(pad_val)을 넣어줌
     q_seqs = pad_sequence(

@@ -12,6 +12,8 @@ from trainers.dkvmn_c_q_ctt_trainer import DKVMN_c_q_ctt_trainer
 from trainers.sakt_c_q_trainer import SAKT_c_q_trainer
 from trainers.sakt_c_rasch_trainer import SAKT_c_rasch_trainer
 from trainers.sakt_c_q_ctt_trainer import SAKT_c_q_ctt_trainer
+from trainers.akt_ctt_trainer import AKT_ctt_trainer
+from trainers.cl4kt_ctt_trainer import cl4kt_ctt_trainer
 
 def get_trainers(model, optimizer, device, num_q, crit, config):
 
@@ -159,5 +161,24 @@ def get_trainers(model, optimizer, device, num_q, crit, config):
             crit = crit,
             max_seq_len=config.max_seq_len           
         )
-
+    elif config.model_name == "akt_ctt":
+        trainer = AKT_ctt_trainer(
+            model = model,
+            optimizer = optimizer,
+            n_epochs = config.n_epochs,
+            device = device,
+            num_q = num_q,
+            crit = crit,
+            max_seq_len=config.max_seq_len           
+        )
+    elif config.model_name == "cl4kt_ctt":
+        trainer = cl4kt_ctt_trainer(
+            model = model,
+            optimizer = optimizer,
+            n_epochs = config.n_epochs,
+            device = device,
+            num_q = num_q,
+            crit = crit,
+            max_seq_len=config.max_seq_len           
+        )
     return trainer
