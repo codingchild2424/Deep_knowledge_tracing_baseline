@@ -139,16 +139,6 @@ def get_trainers(model, optimizer, device, num_q, crit, config):
             crit = crit,
             max_seq_len=config.max_seq_len           
         )
-    elif config.model_name == "sakt_c_q_ctt":
-        trainer = SAKT_c_q_ctt_trainer(
-            model = model,
-            optimizer = optimizer,
-            n_epochs = config.n_epochs,
-            device = device,
-            num_q = num_q,
-            crit = crit,
-            max_seq_len=config.max_seq_len           
-        )
     elif config.model_name == "akt":
         trainer = AKT_trainer(
             model = model,
