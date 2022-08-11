@@ -59,7 +59,10 @@ def define_argparser():
 
     # AKT-R Specific Parameter
     p.add_argument('--akt_l2', type=float, default=1e-5)
-
+    
+    # GKT
+    p.add_argument('--gkt_hidden_size', type=int, default=30)
+    p.add_argument('--gkt_num_attn_heads', type=int, default=2)
     
     config = p.parse_args()
 

@@ -13,6 +13,8 @@ from models.sakt_c_q import SAKT_c_q
 from models.sakt_c_rasch import SAKT_c_rasch
 from models.sakt_c_q_diff import SAKT_c_q_diff
 
+from models.gkt import PAM, MHA
+
 def get_models(num_q, num_r, num_pid, num_diff, device, config):
 
     if config.model_name == "dkt":
@@ -126,6 +128,20 @@ def get_models(num_q, num_r, num_pid, num_diff, device, config):
             dropout=config.akt_dropout_p,
             model_type="akt"
         ).to(device)
+    # GKT
+    elif config.model_name == "gkt_pam":
+        model = PAM(
+            num_q=num_q,
+            hidden_size=config.gkt_hidden_size,
+            num_attn_heads=config.gkt_num_attn_heads
+        ).to(device)
+    elif config.model_name == "gkt_mha":
+        model = MHA(
+            num_q=num_q,
+            hidden_size=config.gkt_hidden_size,
+            num_attn_heads=config.gkt_num_attn_heads
+        ).to(device)
+
     else:
         print("Wrong model_name was used...")
 
