@@ -130,7 +130,6 @@ def get_models(num_q, num_r, num_pid, num_diff, device, config):
             dropout=config.akt_dropout_p,
             model_type="akt"
         ).to(device)
-<<<<<<< HEAD
     # GKT
     elif config.model_name == "gkt_pam":
         model = PAM(
@@ -145,24 +144,6 @@ def get_models(num_q, num_r, num_pid, num_diff, device, config):
             num_attn_heads=config.gkt_num_attn_heads
         ).to(device)
 
-=======
-    elif config.model_name == "akt_ctt":
-        model = AKT_ctt(
-            n_question=num_q,
-            n_pid=num_pid,
-            d_model=config.akt_d_model,
-            n_blocks=config.akt_n_block,
-            kq_same=config.akt_kq_same,
-            dropout=config.akt_dropout_p,
-            model_type="akt"
-        ).to(device)
-    elif config.model_name == "cl4kt_ctt":
-        model = CL4KT_ctt(
-            num_skills=num_q,
-            num_questions=num_pid,
-            seq_len=config.max_seq_len
-        ).to(device)
->>>>>>> 9edc78f9a519e2c562d4bf024ec42ce3b955e3fe
     else:
         print("Wrong model_name was used...")
 
