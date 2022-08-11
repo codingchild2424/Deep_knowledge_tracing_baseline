@@ -3,7 +3,7 @@ from torch.nn import Module, Parameter, Embedding, \
     Sequential, Linear, ReLU, MultiheadAttention, LayerNorm, Dropout
 from torch.nn.init import kaiming_normal_
 
-class SAKT_c_q_diff(Module):
+class SAKT_c_q_ctt(Module):
     def __init__(self, num_q, num_pid, num_diff, n, d, num_attn_heads, device, dropout=.2): #device를 추가함
         super().__init__()
         self.num_q = num_q #문항의 갯수

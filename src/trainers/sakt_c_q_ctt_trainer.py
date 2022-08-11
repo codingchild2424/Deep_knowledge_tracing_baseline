@@ -9,7 +9,7 @@ from random import random, randint
 
 from utils import EarlyStopping
 
-class DKVMN_c_q_ctt_trainer():
+class SAKT_c_q_ctt_trainer():
 
     def __init__(
         self,
@@ -41,21 +41,23 @@ class DKVMN_c_q_ctt_trainer():
 
         for idx, data in enumerate(tqdm(train_loader)):
             self.model.train()
-            q_seqs, r_seqs, _, _, pid_seqs, diff_seqs, mask_seqs = data #collate에 정의된 데이터가 나옴
+            q_seqs, r_seqs, qshft_seqs, rshft_seqs, pid_seqs, diff_seqs, mask_seqs = data #collate에 정의된 데이터가 나옴
             q_seqs = q_seqs.to(self.device) #|q_seqs| = (bs, sq) -> [[58., 58., 58., -0., -0., -0., -0., ...], [58., 58., 58., -0., -0., -0., -0., ...]...]
             r_seqs = r_seqs.to(self.device) #|r_seqs| = (bs, sq) -> [[1., 1., 0., -0., -0., -0., -0., ...], [1., 1., 0., -0., -0., -0., -0., ...]...]
             pid_seqs = pid_seqs.to(self.device)
             diff_seqs = diff_seqs.to(self.device)
+            qshft_seqs = qshft_seqs.to(self.device) #|qshft_seqs| = (bs, sq) -> [[58., 58., 58., -0., -0., -0., -0., ...], [58., 58., 58., -0., -0., -0., -0., ...]...]
+            rshft_seqs = rshft_seqs.to(self.device) #|rshft_seqs| = (bs, sq) -> [[1., 1., 0., -0., -0., -0., -0., ...], [1., 1., 0., -0., -0., -0., -0., ...]...]
             mask_seqs = mask_seqs.to(self.device) #|mask_seqs| = (bs, sq) -> [[True,  True,  True,  ..., False, False, False], [True,  True,  True,  ..., False, False, False]..]
 
-            #DKVMN에서는 결과값이 p와 Mv가 묶인 tuple 형태로 반환되므로, p값만 y_hat으로 넣음
-            y_hat, _ = self.model( q_seqs.long(), r_seqs.long(), pid_seqs.long(), diff_seqs.long() ) #|y_hat| = (bs, sq, self.num_q) -> tensor([[[0.6938, 0.7605, ..., 0.7821], [0.8366, 0.6598,  ..., 0.8514],..)
+            #SAKT에서는 결과값이 p와 Mv가 묶인 tuple 형태로 반환되므로, p값만 y_hat으로 넣음
+            y_hat, _ = self.model( q_seqs.long(), r_seqs.long(), qshft_seqs.long(), pid_seqs.long(), diff_seqs.long() ) #|y_hat| = (bs, sq, self.num_q) -> tensor([[[0.6938, 0.7605, ..., 0.7821], [0.8366, 0.6598,  ..., 0.8514],..)
             #=> 각 sq별로 문항의 확률값들이 담긴 벡터들이 나오게 됨
 
             y_hat = torch.masked_select(y_hat, mask_seqs) #|y_hat| = () -> tensor([0.7782, 0.8887, 0.7638,  ..., 0.8772, 0.8706, 0.8831])
             #=> mask를 활용해서 각 sq 중 실제로 문제를 푼 경우의 확률값만 추출
 
-            correct = torch.masked_select(r_seqs, mask_seqs) #|correct| = () -> tensor([0., 1., 1.,  ..., 1., 1., 1.])
+            correct = torch.masked_select(rshft_seqs, mask_seqs) #|correct| = () -> tensor([0., 1., 1.,  ..., 1., 1., 1.])
             #=> y_hat은 다음 값을 예측하게 되므로, 한칸 뒤의 정답값인 rshft_seqs을 가져옴
             #=> mask를 활용해서 각 sq 중 실제로 문제를 푼 경우의 정답값만 추출
 
@@ -97,18 +99,25 @@ class DKVMN_c_q_ctt_trainer():
         with torch.no_grad():
             for data in tqdm(valid_loader):
                 self.model.eval()
-                q_seqs, r_seqs, _, _, pid_seqs, diff_seqs, mask_seqs = data #collate에 정의된 데이터가 나옴
+                q_seqs, r_seqs, qshft_seqs, rshft_seqs, pid_seqs, diff_seqs, mask_seqs = data #collate에 정의된 데이터가 나옴
                 q_seqs = q_seqs.to(self.device)
                 r_seqs = r_seqs.to(self.device)
                 pid_seqs = pid_seqs.to(self.device)
                 diff_seqs = diff_seqs.to(self.device)
+                qshft_seqs = qshft_seqs.to(self.device)
+                rshft_seqs = rshft_seqs.to(self.device)
                 mask_seqs = mask_seqs.to(self.device)
 
-                y_hat, _ = self.model( q_seqs.long(), r_seqs.long(), pid_seqs.long(), diff_seqs.long() )
+                #SAKT에서는 결과값이 p와 Mv가 묶인 tuple 형태로 반환되므로, p값만 y_hat으로 넣음
+                y_hat, _ = self.model( q_seqs.long(), r_seqs.long(), qshft_seqs.long(), pid_seqs.long(), diff_seqs.long() ) #|y_hat| = (bs, sq, self.num_q) -> tensor([[[0.6938, 0.7605, ..., 0.7821], [0.8366, 0.6598,  ..., 0.8514],..)
+                #=> 각 sq별로 문항의 확률값들이 담긴 벡터들이 나오게 됨
 
-                y_hat = torch.masked_select(y_hat, mask_seqs)
+                y_hat = torch.masked_select(y_hat, mask_seqs) #|y_hat| = () -> tensor([0.7782, 0.8887, 0.7638,  ..., 0.8772, 0.8706, 0.8831])
+                #=> mask를 활용해서 각 sq 중 실제로 문제를 푼 경우의 확률값만 추출
 
-                correct = torch.masked_select(r_seqs, mask_seqs)
+                correct = torch.masked_select(rshft_seqs, mask_seqs) #|correct| = () -> tensor([0., 1., 1.,  ..., 1., 1., 1.])
+                #=> y_hat은 다음 값을 예측하게 되므로, 한칸 뒤의 정답값인 rshft_seqs을 가져옴
+                #=> mask를 활용해서 각 sq 중 실제로 문제를 푼 경우의 정답값만 추출
 
                 loss = self.crit(y_hat, correct)
 
@@ -128,7 +137,6 @@ class DKVMN_c_q_ctt_trainer():
         elif metric_name == "RMSE":
             return loss_result
 
-
     def _test(self, test_loader, metric_name):
 
         auc_score = 0
@@ -138,18 +146,25 @@ class DKVMN_c_q_ctt_trainer():
         with torch.no_grad():
             for data in tqdm(test_loader):
                 self.model.eval()
-                q_seqs, r_seqs, _, _, pid_seqs, diff_seqs, mask_seqs = data #collate에 정의된 데이터가 나옴
+                q_seqs, r_seqs, qshft_seqs, rshft_seqs, pid_seqs, diff_seqs, mask_seqs = data #collate에 정의된 데이터가 나옴
                 q_seqs = q_seqs.to(self.device)
                 r_seqs = r_seqs.to(self.device)
                 pid_seqs = pid_seqs.to(self.device)
                 diff_seqs = diff_seqs.to(self.device)
+                qshft_seqs = qshft_seqs.to(self.device)
+                rshft_seqs = rshft_seqs.to(self.device)
                 mask_seqs = mask_seqs.to(self.device)
 
-                y_hat, _ = self.model( q_seqs.long(), r_seqs.long(), pid_seqs.long(), diff_seqs.long() )
+                #SAKT에서는 결과값이 p와 Mv가 묶인 tuple 형태로 반환되므로, p값만 y_hat으로 넣음
+                y_hat, _ = self.model( q_seqs.long(), r_seqs.long(), qshft_seqs.long(), pid_seqs.long(), diff_seqs.long() ) #|y_hat| = (bs, sq, self.num_q) -> tensor([[[0.6938, 0.7605, ..., 0.7821], [0.8366, 0.6598,  ..., 0.8514],..)
+                #=> 각 sq별로 문항의 확률값들이 담긴 벡터들이 나오게 됨
 
-                y_hat = torch.masked_select(y_hat, mask_seqs)
+                y_hat = torch.masked_select(y_hat, mask_seqs) #|y_hat| = () -> tensor([0.7782, 0.8887, 0.7638,  ..., 0.8772, 0.8706, 0.8831])
+                #=> mask를 활용해서 각 sq 중 실제로 문제를 푼 경우의 확률값만 추출
 
-                correct = torch.masked_select(r_seqs, mask_seqs)
+                correct = torch.masked_select(rshft_seqs, mask_seqs) #|correct| = () -> tensor([0., 1., 1.,  ..., 1., 1., 1.])
+                #=> y_hat은 다음 값을 예측하게 되므로, 한칸 뒤의 정답값인 rshft_seqs을 가져옴
+                #=> mask를 활용해서 각 sq 중 실제로 문제를 푼 경우의 정답값만 추출
 
                 loss = self.crit(y_hat, correct)
 

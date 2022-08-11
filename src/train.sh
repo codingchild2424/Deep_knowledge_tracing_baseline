@@ -1,73 +1,15 @@
 #!/bin/bash
-model_names="sakt dkvmn"
-datasets="algebra2006"
 
-for dataset in ${datasets}
+ctt_model_names="cl4kt_ctt"
+
+for ctt_model_name in ${ctt_model_names}
 do
-    for model_name in ${model_names}
-    do
-        python \
-        train.py \
-        --model_fn sakt_model.pth \
-        --model_name ${model_name} \
-        --dataset_name ${dataset} \
-        --batch_size 512 \
-        --fivefold True \
-        --crit rmse \
-        --n_epochs 1000
-    done
+    python \
+    train.py \
+    --model_fn ${ctt_model_name}0722.pth \
+    --model_name ${ctt_model_name} \
+    --dataset_name assist2009_pid_diff \
+    --batch_size 512 \
+    --fivefold True \
+    --n_epochs 1000
 done
-
-python \
-train.py \
---model_fn model.pth \
---model_name dkt_c_q \
---dataset_name dkt_assist2009_pid
-
-python \
-train.py \
---model_fn model.pth \
---model_name dkt_c_rasch \
---dataset_name dkt_assist2009_pid
-
-python \
-train.py \
---model_fn model.pth \
---model_name dkt_c_q_ctt \
---dataset_name dkt_assist2009_pid_diff
-
-python \
-train.py \
---model_fn model.pth \
---model_name dkvmn_c_q \
---dataset_name assist2009_pid
-
-python \
-train.py \
---model_fn model.pth \
---model_name dkvmn_c_rasch \
---dataset_name assist2009_pid
-
-python \
-train.py \
---model_fn model.pth \
---model_name dkvmn_c_q_ctt \
---dataset_name dkt_assist2009_pid_diff
-
-python \
-train.py \
---model_fn model.pth \
---model_name sakt_c_q \
---dataset_name dkt_assist2009_pid
-
-python \
-train.py \
---model_fn model.pth \
---model_name sakt_c_rasch \
---dataset_name dkt_assist2009_pid
-
-python \
-train.py \
---model_fn model.pth \
---model_name sakt_c_q_diff \
---dataset_name dkt_assist2009_pid_diff
