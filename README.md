@@ -1,11 +1,5 @@
-# Knowledge_tracing_baseline made by CoLA & EDM
+# Knowledge_tracing_baseline
 This code is Deep knowledge Tracing(DKT) baseline code for Learning Analytics(LA) and Educational Data Mining(EDM) researchers.
-
-And this code is made by CoLA & EDM(Community of Learning Analytics and Educational Data Mining), which is the research group of LA and EDM in South Korea.
-
-If you want to contact with us, please send me a mail.
-
-mail address: colaandedm@gmail.com
 
 # Environments
 We use Docker environments for develop my code.
@@ -29,6 +23,10 @@ $ python3 train.py --help
 ```
 $ nvidia-smi
 ```
+
+# Erata
+
+mail address: codingchild@korea.ac.kr
 
 # References
 1) Juno-hwang's Juno-dkt github page
