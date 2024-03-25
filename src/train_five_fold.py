@@ -9,22 +9,22 @@ from define_argparser import define_argparser
 import json
 import os
 
-def main(config, train_loader=None, valid_loader=None, test_loader=None, num_q=None, num_r=None, num_pid=None, num_diff=None):
+def main(config, idx, train_loader=None, valid_loader=None, test_loader=None, num_q=None, num_r=None, num_pid=None, num_diff=None):
 
     #0. make folders
     if os.path.exists("../model_records/") == False:
         os.makedirs("../model_records/")
     if os.path.exists("../score_records/") == False:
-        os.path.exists(score_path)
+        os.path.exists("../score_records/")
+    if os.path.exists("../checkpoints/") == False:
+        os.path.exists("../checkpoints/")
 
     #1. device
     device = torch.device('cpu') if config.gpu_id < 0 else torch.device('cuda:%d' % config.gpu_id)
     
-    if config.fivefold == True:
+    if config.fivefold == False:
         #1. get data
-        train_loader, valid_loader, test_loader, num_q, num_r, num_pid, num_diff = get_loaders(config, idx)
-    else:
-        #1. get data
+        idx = None
         train_loader, valid_loader, test_loader, num_q, num_r, num_pid, num_diff = get_loaders(config)
     
     #2. model
@@ -59,7 +59,8 @@ def main(config, train_loader=None, valid_loader=None, test_loader=None, num_q=N
             "model_fn": config.model_fn,
             "best_test_auc": best_test_auc,
             "best_test_accuracy": best_test_accuracy,
-            "record_time": record_time
+            "record_time": record_time,
+            "fold": idx,
         }) + "\n")
     
     return train_results, valid_results, test_results, best_test_auc, best_test_accuracy, record_time
@@ -73,7 +74,8 @@ if __name__ == "__main__":
         test_accuracy_scores = []
         
         for idx in range(5):
-            train_results, valid_results, test_results, best_test_auc, best_test_accuracy, record_time = main(config, idx)
+            train_loader, valid_loader, test_loader, num_q, num_r, num_pid, num_diff = get_loaders(config, idx)
+            train_results, valid_results, test_results, best_test_auc, best_test_accuracy, record_time = main(config, idx, train_loader, valid_loader, test_loader, num_q, num_r, num_pid, num_diff)
             test_auc_scores.append(best_test_auc)
             test_accuracy_scores.append(best_test_accuracy)
         
@@ -84,4 +86,3 @@ if __name__ == "__main__":
     else:
         train_results, valid_results, test_results, best_test_auc, best_test_accuracy, record_time = main(config)
         recorder(best_test_auc, best_test_accuracy, record_time, config)
-        visualizer(train_results, valid_results, record_time)

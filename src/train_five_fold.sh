@@ -1,5 +1,6 @@
 #!/bin/bash
-# dkt_dbe22_pid
+# test
+
 python train_five_fold.py \
 --model_fn dkt.pth \
 --model_name dkt \

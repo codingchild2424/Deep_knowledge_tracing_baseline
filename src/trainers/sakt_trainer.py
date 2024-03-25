@@ -234,7 +234,7 @@ class SAKT_trainer():
             ))
         print("\n")
         
-        self.model.load_state_dict(torch.load("../checkpoints/checkpoint.pt"))
+        # self.model.load_state_dict(torch.load("../checkpoints/checkpoint.pt"))
 
         return train_results, valid_results, test_results, \
             best_test_auc, best_test_accuracy
