@@ -1,5 +1,5 @@
 from torch.utils.data import DataLoader, random_split, Subset, ConcatDataset
-from utils import collate_fn, pid_collate_fn, dkt_pid_collate_fn, dkt_pid_diff_collate_fn, pid_diff_collate_fn
+from utils import collate_fn, pid_collate_fn, dkt_collate_fn, dkt_pid_collate_fn, dkt_pid_diff_collate_fn, pid_diff_collate_fn
 from dataloaders.assist2015_loader import ASSIST2015
 from dataloaders.assist2009_loader import ASSIST2009
 from dataloaders.algebra2005_loader import ALGEBRA2005
@@ -84,6 +84,20 @@ def get_loaders(config, idx=None):
         num_pid = None
         num_diff = None
         collate = collate_fn
+    elif config.dataset_name == "dbe22":
+        dataset = DBE22(config.max_seq_len)  
+        num_q = dataset.num_q
+        num_r = dataset.num_r
+        num_pid = None
+        num_diff = None
+        collate = collate_fn
+    elif config.dataset_name == "dkt_dbe22":
+        dataset = DBE22(config.max_seq_len)  
+        num_q = dataset.num_q
+        num_r = dataset.num_r
+        num_pid = None
+        num_diff = None
+        collate = dkt_collate_fn
     elif config.dataset_name == "assist2009_pid":
         dataset = ASSIST2009_PID(config.max_seq_len)  
         num_q = dataset.num_q

@@ -9,7 +9,7 @@ from random import random, randint
 
 from utils import EarlyStopping
 
-class DKT_trainer():
+class DKVMN_trainer():
 
     def __init__(
         self,
@@ -48,13 +48,10 @@ class DKT_trainer():
             rshft_seqs = rshft_seqs.to(self.device)
             mask_seqs = mask_seqs.to(self.device)
 
-            y_hat = self.model(q_seqs.long(), r_seqs.long())
-            one_hot_vectors = one_hot(qshft_seqs.long(), self.num_q)
-            y_hat = (y_hat * one_hot_vectors).sum(-1)
-
+            y_hat, _ = self.model(q_seqs.long(), r_seqs.long())
             y_hat = torch.masked_select(y_hat, mask_seqs)
-            correct = torch.masked_select(rshft_seqs, mask_seqs)
 
+            correct = torch.masked_select(r_seqs, mask_seqs)
             loss = self.crit(y_hat, correct)
 
             if self.grad_acc == True:
@@ -101,12 +98,10 @@ class DKT_trainer():
                 rshft_seqs = rshft_seqs.to(self.device)
                 mask_seqs = mask_seqs.to(self.device)
 
-                y_hat = self.model(q_seqs.long(), r_seqs.long())
-                y_hat = (y_hat * one_hot(qshft_seqs.long(), self.num_q)).sum(-1)
-
+                y_hat, _ = self.model(q_seqs.long(), r_seqs.long())
                 y_hat = torch.masked_select(y_hat, mask_seqs)
-                correct = torch.masked_select(rshft_seqs, mask_seqs)
 
+                correct = torch.masked_select(r_seqs, mask_seqs)
                 loss = self.crit(y_hat, correct)
 
                 y_trues.append(correct)
@@ -143,12 +138,10 @@ class DKT_trainer():
                 rshft_seqs = rshft_seqs.to(self.device)
                 mask_seqs = mask_seqs.to(self.device)
 
-                y_hat = self.model(q_seqs.long(), r_seqs.long())
-                y_hat = (y_hat * one_hot(qshft_seqs.long(), self.num_q)).sum(-1)
-
+                y_hat, _ = self.model(q_seqs.long(), r_seqs.long())
                 y_hat = torch.masked_select(y_hat, mask_seqs)
-                correct = torch.masked_select(rshft_seqs, mask_seqs)
 
+                correct = torch.masked_select(r_seqs, mask_seqs)
                 loss = self.crit(y_hat, correct)
 
                 y_trues.append(correct)

@@ -3,7 +3,7 @@ import pandas as pd
 
 from torch.utils.data import Dataset
 
-DATASET_DIR = "../datasets/total.tsv"
+DATASET_DIR = "../datasets/dbe_kt22/total.tsv"
 
 class DBE22(Dataset):
     def __init__(self, max_seq_len, dataset_dir=DATASET_DIR) -> None:
