@@ -26,7 +26,7 @@ $ nvidia-smi
 
 # Erata
 
-mail address: codingchild@korea.ac.kr
+Mail address: codingchild@korea.ac.kr
 
 # References
 1) Juno-hwang's Juno-dkt github page

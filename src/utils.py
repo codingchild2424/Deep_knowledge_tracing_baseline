@@ -345,7 +345,6 @@ class EarlyStopping:
         self.val_loss_min = val_loss
 
 #recoder
-#깔끔하게 한장의 csv로 나오도록 바꿔보기
 def recorder(test_score, record_time, config):
 
     dir_path = "../score_records/"
