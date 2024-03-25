@@ -41,28 +41,18 @@ class AKT_trainer():
 
         for idx, data in enumerate(tqdm(train_loader)):
             self.model.train()
-            q_seqs, r_seqs, pid_seqs, mask_seqs = data #collate에 정의된 데이터가 나옴
-            q_seqs = q_seqs.to(self.device) #|q_seqs| = (bs, sq) -> [[58., 58., 58., -0., -0., -0., -0., ...], [58., 58., 58., -0., -0., -0., -0., ...]...]
-            r_seqs = r_seqs.to(self.device) #|r_seqs| = (bs, sq) -> [[1., 1., 0., -0., -0., -0., -0., ...], [1., 1., 0., -0., -0., -0., -0., ...]...]
+            q_seqs, r_seqs, pid_seqs, mask_seqs = data
+            q_seqs = q_seqs.to(self.device)
+            r_seqs = r_seqs.to(self.device)
             pid_seqs = pid_seqs.to(self.device)
-            mask_seqs = mask_seqs.to(self.device) #|mask_seqs| = (bs, sq) -> [[True,  True,  True,  ..., False, False, False], [True,  True,  True,  ..., False, False, False]..]
-            # |mask_seqs| = (bs, sq)
+            mask_seqs = mask_seqs.to(self.device)
 
-            #SAKT에서는 결과값이 p와 Mv가 묶인 tuple 형태로 반환되므로, p값만 y_hat으로 넣음
-            y_hat, _ = self.model( q_seqs.long(), r_seqs.long(), pid_seqs.long() ) #|y_hat| = (bs, sq, self.num_q) -> tensor([[[0.6938, 0.7605, ..., 0.7821], [0.8366, 0.6598,  ..., 0.8514],..)
-            #=> 각 sq별로 문항의 확률값들이 담긴 벡터들이 나오게 됨
-            # |y_hat| = (bs, sq)
+            y_hat, _ = self.model(q_seqs.long(), r_seqs.long(), pid_seqs.long())
+            y_hat = torch.masked_select(y_hat, mask_seqs)
 
-            y_hat = torch.masked_select(y_hat, mask_seqs) #|y_hat| = () -> tensor([0.7782, 0.8887, 0.7638,  ..., 0.8772, 0.8706, 0.8831])
-            #=> mask를 활용해서 각 sq 중 실제로 문제를 푼 경우의 확률값만 추출
+            correct = torch.masked_select(r_seqs, mask_seqs)
+            loss = self.crit(y_hat, correct)
 
-            correct = torch.masked_select(r_seqs, mask_seqs) #|correct| = () -> tensor([0., 1., 1.,  ..., 1., 1., 1.])
-            #=> y_hat은 다음 값을 예측하게 되므로, 한칸 뒤의 정답값인 rshft_seqs을 가져옴
-            #=> mask를 활용해서 각 sq 중 실제로 문제를 푼 경우의 정답값만 추출
-
-            loss = self.crit(y_hat, correct) #|loss| = () -> ex) 0.5432
-
-            #grad_accumulation
             if self.grad_acc == True:
                 loss.backward()
                 if (idx + 1) % self.grad_acc_iter == 0:
@@ -77,17 +67,19 @@ class AKT_trainer():
             y_scores.append(y_hat)
             loss_list.append(loss)
 
-        y_trues = torch.cat(y_trues).detach().cpu().numpy() #|y_tures| = () -> [0. 0. 0. ... 1. 1. 1.]
-        y_scores = torch.cat(y_scores).detach().cpu().numpy() #|y_scores| = () ->  tensor(0.5552)
+        y_trues = torch.cat(y_trues).detach().cpu().numpy()
+        y_scores = torch.cat(y_scores).detach().cpu().numpy()
 
-        auc_score += metrics.roc_auc_score( y_trues, y_scores ) #|metrics.roc_auc_score( y_trues, y_scores )| = () -> 0.6203433289463159
+        auc = metrics.roc_auc_score(y_trues, y_scores)
+        accuracy = metrics.accuracy_score(y_trues, y_scores >= 0.5)
 
         loss_result = torch.mean(torch.Tensor(loss_list)).detach().cpu().numpy()
 
-        if metric_name == "AUC":
-            return auc_score
-        elif metric_name == "RMSE":
-            return loss_result
+        return {
+            "loss": loss_result,
+            "auc": auc,
+            "accuracy": accuracy
+        }
 
     def _validate(self, valid_loader, metric_name):
 
@@ -98,23 +90,16 @@ class AKT_trainer():
         with torch.no_grad():
             for data in tqdm(valid_loader):
                 self.model.eval()
-                q_seqs, r_seqs, pid_seqs, mask_seqs = data #collate에 정의된 데이터가 나옴
+                q_seqs, r_seqs, pid_seqs, mask_seqs = data
                 q_seqs = q_seqs.to(self.device)
                 r_seqs = r_seqs.to(self.device)
                 pid_seqs = pid_seqs.to(self.device)
                 mask_seqs = mask_seqs.to(self.device)
 
-                #SAKT에서는 결과값이 p와 Mv가 묶인 tuple 형태로 반환되므로, p값만 y_hat으로 넣음
-                y_hat, _ = self.model( q_seqs.long(), r_seqs.long(), pid_seqs.long() ) #|y_hat| = (bs, sq, self.num_q) -> tensor([[[0.6938, 0.7605, ..., 0.7821], [0.8366, 0.6598,  ..., 0.8514],..)
-                #=> 각 sq별로 문항의 확률값들이 담긴 벡터들이 나오게 됨
+                y_hat, _ = self.model(q_seqs.long(), r_seqs.long(), pid_seqs.long())
+                y_hat = torch.masked_select(y_hat, mask_seqs)
 
-                y_hat = torch.masked_select(y_hat, mask_seqs) #|y_hat| = () -> tensor([0.7782, 0.8887, 0.7638,  ..., 0.8772, 0.8706, 0.8831])
-                #=> mask를 활용해서 각 sq 중 실제로 문제를 푼 경우의 확률값만 추출
-
-                correct = torch.masked_select(r_seqs, mask_seqs) #|correct| = () -> tensor([0., 1., 1.,  ..., 1., 1., 1.])
-                #=> y_hat은 다음 값을 예측하게 되므로, 한칸 뒤의 정답값인 rshft_seqs을 가져옴
-                #=> mask를 활용해서 각 sq 중 실제로 문제를 푼 경우의 정답값만 추출
-
+                correct = torch.masked_select(r_seqs, mask_seqs)
                 loss = self.crit(y_hat, correct)
 
                 y_trues.append(correct)
@@ -124,14 +109,16 @@ class AKT_trainer():
         y_trues = torch.cat(y_trues).detach().cpu().numpy()
         y_scores = torch.cat(y_scores).detach().cpu().numpy()
 
-        auc_score += metrics.roc_auc_score( y_trues, y_scores )
+        auc = metrics.roc_auc_score(y_trues, y_scores)
+        accuracy = metrics.accuracy_score(y_trues, y_scores >= 0.5)
 
         loss_result = torch.mean(torch.Tensor(loss_list)).detach().cpu().numpy()
 
-        if metric_name == "AUC":
-            return auc_score
-        elif metric_name == "RMSE":
-            return loss_result
+        return {
+            "loss": loss_result,
+            "auc": auc,
+            "accuracy": accuracy
+        }
 
     def _test(self, test_loader, metric_name):
 
@@ -142,23 +129,16 @@ class AKT_trainer():
         with torch.no_grad():
             for data in tqdm(test_loader):
                 self.model.eval()
-                q_seqs, r_seqs, pid_seqs, mask_seqs = data #collate에 정의된 데이터가 나옴
+                q_seqs, r_seqs, pid_seqs, mask_seqs = data
                 q_seqs = q_seqs.to(self.device)
                 r_seqs = r_seqs.to(self.device)
                 pid_seqs = pid_seqs.to(self.device)
                 mask_seqs = mask_seqs.to(self.device)
 
-                #SAKT에서는 결과값이 p와 Mv가 묶인 tuple 형태로 반환되므로, p값만 y_hat으로 넣음
-                y_hat, _ = self.model( q_seqs.long(), r_seqs.long(), pid_seqs.long() ) #|y_hat| = (bs, sq, self.num_q) -> tensor([[[0.6938, 0.7605, ..., 0.7821], [0.8366, 0.6598,  ..., 0.8514],..)
-                #=> 각 sq별로 문항의 확률값들이 담긴 벡터들이 나오게 됨
+                y_hat, _ = self.model(q_seqs.long(), r_seqs.long(), pid_seqs.long())
+                y_hat = torch.masked_select(y_hat, mask_seqs)
 
-                y_hat = torch.masked_select(y_hat, mask_seqs) #|y_hat| = () -> tensor([0.7782, 0.8887, 0.7638,  ..., 0.8772, 0.8706, 0.8831])
-                #=> mask를 활용해서 각 sq 중 실제로 문제를 푼 경우의 확률값만 추출
-
-                correct = torch.masked_select(r_seqs, mask_seqs) #|correct| = () -> tensor([0., 1., 1.,  ..., 1., 1., 1.])
-                #=> y_hat은 다음 값을 예측하게 되므로, 한칸 뒤의 정답값인 rshft_seqs을 가져옴
-                #=> mask를 활용해서 각 sq 중 실제로 문제를 푼 경우의 정답값만 추출
-
+                correct = torch.masked_select(r_seqs, mask_seqs)
                 loss = self.crit(y_hat, correct)
 
                 y_trues.append(correct)
@@ -168,38 +148,37 @@ class AKT_trainer():
         y_trues = torch.cat(y_trues).detach().cpu().numpy()
         y_scores = torch.cat(y_scores).detach().cpu().numpy()
 
-        auc_score += metrics.roc_auc_score( y_trues, y_scores )
+        auc = metrics.roc_auc_score(y_trues, y_scores)
+        accuracy = metrics.accuracy_score(y_trues, y_scores >= 0.5)
 
         loss_result = torch.mean(torch.Tensor(loss_list)).detach().cpu().numpy()
 
-        if metric_name == "AUC":
-            return auc_score
-        elif metric_name == "RMSE":
-            return loss_result
+        return {
+            "loss": loss_result,
+            "auc": auc,
+            "accuracy": accuracy
+        }
 
-    #auc용으로 train
     def train(self, train_loader, valid_loader, test_loader, config):
         
         if config.crit == "binary_cross_entropy":
-            best_valid_score = 0
-            best_test_score = 0
-            metric_name = "AUC"
+            best_valid_auc = 0
+            best_test_auc = 0
+            best_test_accuracy = 0
+            metric_name = "auc"
         elif config.crit == "rmse":
-            best_valid_score = float('inf')
-            best_test_score = float('inf')
-            metric_name = "RMSE"
+            best_valid_loss = float('inf')
+            best_test_loss = float('inf')
+            best_test_accuracy = 0
+            metric_name = "loss"
         
-        #출력을 위한 기록용
-        train_scores = []
-        valid_scores = []
-        test_scores = []
-        #best_model = None
+        train_results = []
+        valid_results = []
+        test_results = []
 
-        # early_stopping 선언
         early_stopping = EarlyStopping(metric_name=metric_name,
-                                    best_score=best_valid_score)
+                                    best_score=best_valid_auc if metric_name == "auc" else best_valid_loss)
 
-        # Train and Valid Session
         for epoch_index in range(self.n_epochs):
             
             print("Epoch(%d/%d) start" % (
@@ -207,51 +186,52 @@ class AKT_trainer():
                 self.n_epochs
             ))
 
-            # Training Session
-            train_score = self._train(train_loader, metric_name)
-            valid_score = self._validate(valid_loader, metric_name)
-            test_score = self._test(test_loader, metric_name)
+            train_result = self._train(train_loader, metric_name)
+            valid_result = self._validate(valid_loader, metric_name)
+            test_result = self._test(test_loader, metric_name)
 
-            # train, test record 저장
-            train_scores.append(train_score)
-            valid_scores.append(valid_score)
-            test_scores.append(test_score)
+            train_results.append(train_result)
+            valid_results.append(valid_result)
+            test_results.append(test_result)
 
-            # early stop
-            train_scores_avg = np.average(train_scores)
-            valid_scores_avg = np.average(valid_scores)
-            early_stopping(valid_scores_avg, self.model)
+            train_metric_avg = np.average([r[metric_name] for r in train_results])
+            valid_metric_avg = np.average([r[metric_name] for r in valid_results])
+            early_stopping(valid_metric_avg, self.model)
             if early_stopping.early_stop:
                 print("Early stopping")
                 break
 
-            if config.crit == "binary_cross_entropy":
-                if test_score >= best_test_score:
-                    best_test_score = test_score
-                    #best_model = deepcopy(self.model.state_dict())
-            elif config.crit == "rmse":
-                if test_score <= best_test_score:
-                    best_test_score = test_score
-                    #best_model = deepcopy(self.model.state_dict())
+            if test_result["auc"] >= best_test_auc:
+                best_test_auc = test_result["auc"]
+            if test_result["accuracy"] >= best_test_accuracy:
+                best_test_accuracy = test_result["accuracy"]
 
-            print("Epoch(%d/%d) result: train_score=%.4f  valid_score=%.4f test_score=%.4f best_test_score=%.4f" % (
+            print("Epoch(%d/%d) result: train_loss=%.4f train_auc=%.4f train_accuracy=%.4f valid_loss=%.4f valid_auc=%.4f valid_accuracy=%.4f test_loss=%.4f test_auc=%.4f test_accuracy=%.4f best_test_auc=%.4f best_test_accuracy=%.4f" % (
                 epoch_index + 1,
                 self.n_epochs,
-                train_score,
-                valid_score,
-                test_score,
-                best_test_score,
+                train_result["loss"],
+                train_result["auc"],
+                train_result["accuracy"],
+                valid_result["loss"],
+                valid_result["auc"],
+                valid_result["accuracy"],
+                test_result["loss"],
+                test_result["auc"],
+                test_result["accuracy"],
+                best_test_auc,
+                best_test_accuracy,
             ))
 
         print("\n")
-        print("The Best Test Score(" + metric_name + ") in Testing Session is %.4f" % (
-                best_test_score,
+        print("The Best Test AUC in Testing Session is %.4f" % (
+                best_test_auc,
+            ))
+        print("The Best Test Accuracy in Testing Session is %.4f" % (
+                best_test_accuracy,
             ))
         print("\n")
         
-        # 가장 최고의 모델 복구
-        #self.model.load_state_dict(best_model)
         self.model.load_state_dict(torch.load("../checkpoints/checkpoint.pt"))
 
-        return train_scores, valid_scores, \
-            best_valid_score, best_test_score
+        return train_results, valid_results, test_results, \
+            best_test_auc, best_test_accuracy

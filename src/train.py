@@ -8,6 +8,7 @@ from get_modules.get_trainers import get_trainers
 from utils import get_optimizers, get_crits, recorder, visualizer
 
 from define_argparser import define_argparser
+import json
 
 def main(config, train_loader=None, valid_loader=None, test_loader=None, num_q=None, num_r=None, num_pid=None, num_diff=None):
     #0. device
@@ -29,28 +30,33 @@ def main(config, train_loader=None, valid_loader=None, test_loader=None, num_q=N
     trainer = get_trainers(model, optimizer, device, num_q, crit, config)
 
     #6. train
-    train_auc_scores, valid_auc_scores, \
-        highest_auc_score, test_auc_score  = trainer.train(train_loader, valid_loader, test_loader, config)
+    train_results, valid_results, test_results, best_test_auc, best_test_accuracy = trainer.train(train_loader, valid_loader, test_loader, config)
 
     today = datetime.datetime.today()
     record_time = str(today.month) + "_" + str(today.day) + "_" + str(today.hour) + "_" + str(today.minute)
-
+    
     #7. model 기록 저장 위치
-    model_path = '../model_records/' + str(test_auc_score) + "_" + record_time + "_" + config.model_fn
-
+    model_path = '../model_records/' + str(best_test_auc) + "_" + record_time + "_" + config.model_fn
+    
     #8. model 기록
     torch.save({
         'model': trainer.model.state_dict(),
         'config': config
     }, model_path)
 
-    return train_auc_scores, valid_auc_scores, highest_auc_score, test_auc_score, record_time
+    score_path = "../score_records/auc_record.jsonl"
+
+    #9. score 기록
+    with open(score_path, 'a') as f:
+        f.write(json.dumps({
+            "model_fn": config.model_fn,
+            "best_test_auc": best_test_auc,
+            "best_test_accuracy": best_test_accuracy,
+            "record_time": record_time
+        }) + "\n")
 
 #fivefold main
 if __name__ == "__main__":
     config = define_argparser()
-
-    train_auc_scores, valid_auc_scores, \
-            best_valid_score, test_auc_score, record_time = main(config)
-    recorder(test_auc_score, record_time, config)
+    main(config)
     
