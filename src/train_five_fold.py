@@ -7,9 +7,17 @@ from get_modules.get_trainers import get_trainers
 from utils import get_optimizers, get_crits, recorder, visualizer
 from define_argparser import define_argparser
 import json
+import os
 
 def main(config, train_loader=None, valid_loader=None, test_loader=None, num_q=None, num_r=None, num_pid=None, num_diff=None):
-    #0. device
+
+    #0. make folders
+    if os.path.exists("../model_records/") == False:
+        os.makedirs("../model_records/")
+    if os.path.exists("../score_records/") == False:
+        os.path.exists(score_path)
+
+    #1. device
     device = torch.device('cpu') if config.gpu_id < 0 else torch.device('cuda:%d' % config.gpu_id)
     
     if config.fivefold == True:
@@ -37,18 +45,15 @@ def main(config, train_loader=None, valid_loader=None, test_loader=None, num_q=N
     today = datetime.datetime.today()
     record_time = str(today.month) + "_" + str(today.day) + "_" + str(today.hour) + "_" + str(today.minute)
     
-    #7. model 기록 저장 위치
+    #7. model 기록
     model_path = '../model_records/' + str(best_test_auc) + "_" + record_time + "_" + config.model_fn
-    
-    #8. model 기록
     torch.save({
         'model': trainer.model.state_dict(),
         'config': config
     }, model_path)
     
+    #8. score 기록
     score_path = "../score_records/auc_record.jsonl"
-    
-    #9. score 기록
     with open(score_path, 'a') as f:
         f.write(json.dumps({
             "model_fn": config.model_fn,
