@@ -82,7 +82,5 @@ if __name__ == "__main__":
         test_auc_score = sum(test_auc_scores) / 5
         test_accuracy_score = sum(test_accuracy_scores) / 5
         
-        recorder(test_auc_score, test_accuracy_score, record_time, config)
     else:
         train_results, valid_results, test_results, best_test_auc, best_test_accuracy, record_time = main(config)
-        recorder(best_test_auc, best_test_accuracy, record_time, config)
