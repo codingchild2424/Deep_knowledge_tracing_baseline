@@ -16,6 +16,7 @@ from dataloaders.algebra2005_pid_loader import ALGEBRA2005_PID
 from dataloaders.algebra2006_pid_loader import ALGEBRA2006_PID
 from dataloaders.assist2009_pid_diff_loader import ASSIST2009_PID_DIFF
 from dataloaders.dbe22 import DBE22
+from dataloaders.xes3g5m import XES3G5M
 
 #get_loaders를 따로 만들고, 이 함수를 train에서 불러내기
 def get_loaders(config, idx=None):
@@ -86,6 +87,13 @@ def get_loaders(config, idx=None):
         collate = collate_fn
     elif config.dataset_name == "dbe22":
         dataset = DBE22(config.max_seq_len)  
+        num_q = dataset.num_q
+        num_r = dataset.num_r
+        num_pid = None
+        num_diff = None
+        collate = collate_fn
+    elif config.dataset_name == "xes3g5m":
+        dataset = XES3G5M(config.max_seq_len)  
         num_q = dataset.num_q
         num_r = dataset.num_r
         num_pid = None

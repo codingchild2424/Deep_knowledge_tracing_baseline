@@ -1,13 +1,21 @@
 #!/bin/bash
 # test
 
+python train_five_fold.py \
+--model_fn dkt.pth \
+--model_name dkt \
+--dataset_name xes3g5m \
+--batch_size 512 \
+--fivefold False \
+--n_epochs 5
+
 # python train_five_fold.py \
 # --model_fn dkt.pth \
 # --model_name dkt \
 # --dataset_name dkt_dbe22 \
 # --batch_size 512 \
-# --fivefold True \
-# --n_epochs 200
+# --fivefold False \
+# --n_epochs 5
 
 # python train_five_fold.py \
 # --model_fn dkvmn.pth \
@@ -25,13 +33,13 @@
 # --fivefold True \
 # --n_epochs 200
 
-python train_five_fold.py \
---model_fn gkt.pth \
---model_name gkt_pam \
---dataset_name dbe22 \
---batch_size 512 \
---fivefold True \
---n_epochs 200
+# python train_five_fold.py \
+# --model_fn gkt.pth \
+# --model_name gkt_pam \
+# --dataset_name dbe22 \
+# --batch_size 512 \
+# --fivefold True \
+# --n_epochs 200
 
 # python train_five_fold.py \
 # --model_fn akt.pth \
